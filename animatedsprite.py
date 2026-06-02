@@ -15,7 +15,7 @@ class AnimatedSprite():
                  hurtbox_width:float=23,hurtbox_height:float=36,sprite_offsetx:float=0,sprite_offsety:float=0,text_colour:str='green',
                  surface_to_draw_on:str='win',penToUse='arial15',ignoreCameraOffset:bool=False,
 
-                 name:str='AnimatedSprite',img_path:str='Sprites/Cards/Hearts/1.png',img_width:int=32,img_width_scale:int=1,img_height:int=32,img_height_scale:int=1,
+                 name:str='AnimatedSprite',img_path:str=os.path.join(os.path.dirname(__file__),'Sprites','Cards','Hearts','1.png'),img_width:int=32,img_width_scale:int=1,img_height:int=32,img_height_scale:int=1,
                  animation_delay:int=1,animation_speed:float=1,alpha:int=255,
 
                  draw_sine_wave_speed:float=1,draw_sine_wave_amplitude:float=1,

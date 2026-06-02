@@ -1,6 +1,6 @@
 import pygame,os,re,sys
 from pygame.math import Vector2
-from raycast import Raycast
+from .raycast import Raycast
 from .animatedsprite import AnimatedSprite
 from .globs import delta,FPS
 from .objectsystem import objectManager
@@ -367,11 +367,11 @@ class Moveable_Object(AnimatedSprite):
 
     def spawnL(self):
         self.hurtbox.center = self.spawnLocation
-        if self.__class__.__name__ == 'Door':
-            self.hitbox.center = self.spawnLocation
-            self.is_active = True
-            self.update_position()
-            print(self.hurtbox.center)
+        # if self.__class__.__name__ == 'Door':
+        #     self.hitbox.center = self.spawnLocation
+        #     self.is_active = True
+        #     self.update_position()
+        #     print(self.hurtbox.center)
 
 
     # # finding direction vector function, when you have a specific point
@@ -1215,22 +1215,22 @@ class Moveable_Object(AnimatedSprite):
         self.surrounding_game_objects = list(set(self.surrounding_game_objects))
 
     # apply damage function, handles death too
-    def apply_damage(self,gameobj:Moveable_Object,damage:float):
+    def apply_damage(self,gameobj,damage:float):
 
         gameobj.health -= damage
         gameobj.health = max(0,gameobj.health)
 
         # init damage number
-        # if engine.display_dmg_num == 1:
-        #     dmgnum = engine.inactive_pool['DamageNumber'][0]
+        # if pynaccle.display_dmg_num == 1:
+        #     dmgnum = pynaccle.inactive_pool['DamageNumber'][0]
         #     dmgnum.init(f"{damage}")
         #     dmgnum.spawn(gameobj.hurtbox.center)
         #     dmgnum.update_movement_vectors(unique_id='movement',direction_vectorX=0,
         #                                     direction_vectorY=-1,acceleration=self.acceleration,Xcceleration_rate=0,
         #                                     Xcceleration_rate_change='negative',
         #                                     max_value=self.acceleration,reduce_on_wall_collision=False,reset_on_max_value=False)
-        #     engine.inactive_pool['DamageNumber'].remove(dmgnum)
-        #     engine.active_pool.append(dmgnum)
+        #     pynaccle.inactive_pool['DamageNumber'].remove(dmgnum)
+        #     pynaccle.active_pool.append(dmgnum)
 
 
 
@@ -1479,6 +1479,6 @@ objectManager.inactive_pool["DamageNumber"] = [DamageNumber() for _ in range(300
 
 #         if event.key == pygame.K_c:
 
-#            engine.display_dmg_num *= -1
+#            pynaccle.display_dmg_num *= -1
 
-# engine.extra_event_processing.append(display_dmg_num_event)
+# pynaccle.extra_event_processing.append(display_dmg_num_event)

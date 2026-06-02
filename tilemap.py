@@ -22,9 +22,9 @@ class Tilemap():
 
         # add window for chunk
         # set chunk in bg surf
-        gameScreen.add_window('Chunk1',width=3200,height=3200,pos=(gameScreen.fullscreen_width//2,gameScreen.fullscreen_height//2))
-        gameScreen.windows['Chunk1'].bg_offset_x = 1280//2
-        gameScreen.windows['Chunk1'].bg_offset_y = 720//2
+        gameScreen.add_window('Chunk1',width=6400,height=6400,pos=(gameScreen.fullscreen_width//2,gameScreen.fullscreen_height//2),zoom=gameScreen.windows['win'].zoom)
+        gameScreen.windows['Chunk1'].bg_offset_x = (gameScreen.windows['Chunk1'].win_width)//2
+        gameScreen.windows['Chunk1'].bg_offset_y = (gameScreen.windows['Chunk1'].win_height)//2
 
 
         # store all pos and layers
@@ -91,6 +91,9 @@ class Tilemap():
                 newObj.init_sprite()
 
                 posss = ast.literal_eval(pos)
+
+                if posss == (0,0):
+                    continue
                 newObj.draw_surface(position=ast.literal_eval(pos),schedule_deletion=False)
 
                 # objectManager.active_pool.append(newObj)
@@ -104,12 +107,7 @@ class Tilemap():
                 #     sys.exit()
                 newObj.is_active = True
                 objectManager.active_pool.append(newObj)
-        # print(self.tilemap)
-
-
 
         gameScreen.windows['Chunk1'].render_objects()
-
-
 
 tilemapProcessor = Tilemap()
