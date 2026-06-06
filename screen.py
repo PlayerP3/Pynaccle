@@ -21,9 +21,9 @@ class Screen():
         self.bgSurface = {}
 
     # function to add window
-    def add_window(self,winName:str,width:int,height:int,pos:tuple):
+    def add_window(self,winName:str,width:int,height:int,zoom:float,pos:tuple):
 
-        self.windows[winName] = Window(width=width,height=height,pos=pos)
+        self.windows[winName] = Window(width=width,height=height,pos=pos,zoom=zoom)
 
     def render_windows(self):
 
@@ -33,7 +33,7 @@ class Screen():
 
 class Window():
     
-    def __init__(self,width:int=1200,height:int=800,pos:tuple=(0,0)):
+    def __init__(self,width:int=1200,height:int=800,zoom:float=1,pos:tuple=(0,0)):
 
         # drawing queue for window
         self.drawing_queue = {}
@@ -58,7 +58,7 @@ class Window():
         self.movement = Vector2(0,0)
         self.damping = 0.9 # takes values between 0 and 1, loweer values = dampeningn spring/friction so object doesnt overshoot
         self.spring_stiffness = 0.01 # the inverse of smoothness, higher values is less smooth, loiwer vlaue sis more smooth
-        self.zoom = 1
+        self.zoom = zoom
 
         
     # change camera view based on what is being shown
@@ -219,11 +219,43 @@ class Window():
         self.drawing_queue = {k:self.drawing_queue[k] for k in self.drawing_queue if not self.drawing_queue[k]['schedule_deletion']}
 
 
-    def draw_surface(self,asset_to_draw,asset_type:str='surface',game_object_origin:str='game',is_animated:bool=False,schedule_deletion:bool=True,
+    def draw_overlay(self,asset_to_draw,asset_type:str='surface',game_object_origin:str='game',is_animated:bool=False,schedule_deletion:bool=True,
                        animation_length:int=0,position:tuple=(0,0),value:int=0,is_critical:bool=False,initial_width:int=0,initial_height:int=0,
                        zlayer:int=-1,ignoreCameraOffset:bool=False,alpha:int=255):
 
         position = (position[0] - (self.win.get_width()/gameScreen.windows['win'].zoom)//2,position[1]- (self.win.get_height()//gameScreen.windows['win'].zoom)//2)
+
+        random_id = ''.join(random.choices(string.ascii_letters + string.digits, k=12))
+
+
+        self.drawing_queue[random_id] = {'game_object':'obj',
+                                        'asset_to_draw':asset_to_draw,
+                                        'asset_type':asset_type,
+                                        'z_layer':zlayer,
+                                        'game_object_origin':game_object_origin,
+                                        'is_animated':is_animated,
+                                        'animation_length':animation_length,
+                                        'animation_timer':animation_length,
+                                        'position':position,
+                                        'position_rect':0,
+                                        'value':value,
+                                        'is_critical':is_critical,
+                                        'sin_waveY':0,
+                                        'sin_waveX':0,
+                                        'sin_waveX_movement':random.choice(['positive','negative']),
+                                        'initial_width':initial_width,
+                                        'initial_height':initial_height,
+                                        'scale_factor_timer':1,
+                                        'alpha':alpha,
+                                        'ignore_offset':ignoreCameraOffset,
+                                        'schedule_deletion':schedule_deletion}
+        
+
+    def draw_tilemap(self,asset_to_draw,asset_type:str='surface',game_object_origin:str='game',is_animated:bool=False,schedule_deletion:bool=True,
+                       animation_length:int=0,position:tuple=(0,0),value:int=0,is_critical:bool=False,initial_width:int=0,initial_height:int=0,
+                       zlayer:int=-1,ignoreCameraOffset:bool=False,alpha:int=255):
+
+        position = (position[0]//self.zoom,position[1]//self.zoom)
 
         random_id = ''.join(random.choices(string.ascii_letters + string.digits, k=12))
 

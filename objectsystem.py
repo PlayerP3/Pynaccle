@@ -1,4 +1,5 @@
 import pygame,random,os,string,numpy,math,json,copy,ast
+from .tilemap import tilemapProcessor
 pygame.font.init()
 
 class ObjectSystem():
@@ -27,6 +28,10 @@ class ObjectSystem():
             to_remove = []
 
             for gameobj in self.active_pool:
+                
+                # if not in current chunk then move past it
+
+
                 gameobj.update()
                 if not gameobj.is_active:
                     to_remove.append(gameobj)
@@ -42,6 +47,16 @@ class ObjectSystem():
                         self.active_pool.remove(gameobj)
                         self.inactiveNoPool.append(gameobj)
 
+    def add_chunk(self,chunk:int):
+
+        if chunk not in tilemapProcessor.openChunks:
+            tilemapProcessor.openChunks.append(chunk)
+
+            for bbj in tilemapProcessor.chunkObj[chunk]:
+                bbj.init()
+                bbj.spawnL()
+                
+            self.active_pool.extend(tilemapProcessor.chunkObj[chunk])
 
     # def draw_tilemap(self):
 

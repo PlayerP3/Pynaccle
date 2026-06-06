@@ -15,8 +15,8 @@ class AnimatedSprite():
                  hurtbox_width:float=23,hurtbox_height:float=36,sprite_offsetx:float=0,sprite_offsety:float=0,text_colour:str='green',
                  surface_to_draw_on:str='win',penToUse='arial15',ignoreCameraOffset:bool=False,
 
-                 name:str='AnimatedSprite',img_path:str='Sprites/Cards/Hearts/1.png',img_width:int=32,img_width_scale:int=1,img_height:int=32,img_height_scale:int=1,
-                 animation_delay:int=1,animation_speed:float=1,alpha:int=255,
+                 name:str='AnimatedSprite',img_path:str=os.path.join(os.path.dirname(__file__),'Sprites','Cards','Hearts','1.png'),img_width:int=32,img_width_scale:int=1,img_height:int=32,img_height_scale:int=1,
+                 spriteWidth:float=32,spriteWidthScale:float=1,spriteHeight:float=32,spriteHeightScale:float=1,hasSpriteSheet:bool=False,animation_delay:int=1,animation_speed:float=1,alpha:int=255,
 
                  draw_sine_wave_speed:float=1,draw_sine_wave_amplitude:float=1,
 
@@ -37,6 +37,7 @@ class AnimatedSprite():
         self.ignoreCameraOffset = ignoreCameraOffset
 
         # set sprite
+        self.hasSpriteSheet = hasSpriteSheet
         self.sprite = None
         self.image = None
         self.mask = None
@@ -53,6 +54,9 @@ class AnimatedSprite():
 
         # this rect is used for movement and collision
         self.hurtbox = pygame.FRect(0,0,hurtbox_width,hurtbox_height)
+
+        self.hitboxData = {}
+        self.hitboxes = {}
 
         self.hurtbox_width = hurtbox_width
         self.hurtbox_height = hurtbox_height
@@ -90,6 +94,12 @@ class AnimatedSprite():
         self.img_height = img_height
         self.img_height_scale = img_height_scale
 
+        # vars for individual sprites in the spritesheet
+        self.spriteWidth = spriteWidth
+        self.spriteHeight = spriteHeight
+        self.spriteWidthScale = spriteWidthScale
+        self.spriteHeightScale = spriteHeightScale
+
         # clearance value
         self.clearance = 1
 
@@ -112,14 +122,14 @@ class AnimatedSprite():
     def load_sprite_sheet(self):
         
         # determine scaled img width and height
-        scaled_width = int(self.img_width*self.img_width_scale*gameScreen.windows[self.surface_to_draw_on].zoom)
-        scaled_height = int(self.img_height*self.img_height_scale*gameScreen.windows[self.surface_to_draw_on].zoom)
+        scaled_width = int(self.spriteWidth*self.spriteWidthScale*gameScreen.windows[self.surface_to_draw_on].zoom)
+        scaled_height = int(self.spriteHeight*self.spriteHeightScale*gameScreen.windows[self.surface_to_draw_on].zoom)
 
         sprite_collection = {}
 
-        for j in range((self.image.get_height()//self.img_height)):
+        for j in range((self.img_height//self.spriteHeight)):
 
-            for i in range((self.image.get_width()//self.img_width)): 
+            for i in range((self.img_width//self.spriteWidth)): 
 
                 transimg = pygame.transform.scale(self.image,(scaled_width,scaled_height))
                 rotated_surf = pygame.transform.rotate(transimg,angle=-self.direction)
@@ -131,12 +141,16 @@ class AnimatedSprite():
 
         # load image from memory if it is in json already
         if self.img_path in SpriteCache:
+
             if 'loaded_image' in SpriteCache[self.img_path]:
                 self.image = SpriteCache[self.img_path]['loaded_image']
-
-           
                 self.img_width = self.image.get_width()
                 self.img_height = self.image.get_height()
+
+                if not self.hasSpriteSheet:
+                    self.spriteWidth = self.img_width
+                    self.spriteHeight = self.img_height
+
 
         # load image and store it in json if it does not exist
         elif self.img_path not in SpriteCache:
@@ -146,6 +160,10 @@ class AnimatedSprite():
                 self.image = SpriteCache[self.img_path]['loaded_image']
                 self.img_width = self.image.get_width()
                 self.img_height = self.image.get_height()
+
+                if not self.hasSpriteSheet:
+                    self.spriteWidth = self.img_width
+                    self.spriteHeight = self.img_height
 
             elif self.is_text:
                 self.create_text_image()
@@ -157,8 +175,8 @@ class AnimatedSprite():
         self.load_or_update_image()
            
         # determine scaled img width and height
-        scaled_width = int(self.img_width*self.img_width_scale*gameScreen.windows[self.surface_to_draw_on].zoom)
-        scaled_height = int(self.img_height*self.img_height_scale*gameScreen.windows[self.surface_to_draw_on].zoom)
+        scaled_width = int(self.spriteWidth*self.spriteWidthScale*gameScreen.windows[self.surface_to_draw_on].zoom)
+        scaled_height = int(self.spriteHeight*self.spriteHeightScale*gameScreen.windows[self.surface_to_draw_on].zoom)
 
         # get dimensions
         dimensions = f"({scaled_width},{scaled_height})"
@@ -209,16 +227,18 @@ class AnimatedSprite():
         # set image
         self.image = surf
 
-        # set width and heigh to be that of the image
+        # set width and heigh to be that of the image, sprite width is always the same as img width for text
         self.img_width = self.image.get_width()
         self.img_height = self.image.get_height()
+        self.spriteWidth = self.img_width
+        self.spriteHeight = self.img_height
 
     # update mask and rect based on current sprite
     def update_rect_and_mask(self,SpriteCache:dict=GameSprites):
 
         # determine scaled img width and height
-        scaled_width = int(self.img_width*self.img_width_scale*gameScreen.windows[self.surface_to_draw_on].zoom)
-        scaled_height = int(self.img_height*self.img_height_scale*gameScreen.windows[self.surface_to_draw_on].zoom)
+        scaled_width = int(self.spriteWidth*self.spriteWidthScale*gameScreen.windows[self.surface_to_draw_on].zoom)
+        scaled_height = int(self.spriteHeight*self.spriteHeightScale*gameScreen.windows[self.surface_to_draw_on].zoom)
 
         # get dimensions
         dimensions = f"({scaled_width},{scaled_height})"
@@ -247,13 +267,13 @@ class AnimatedSprite():
     def update_sprite(self,SpriteCache:dict=GameSprites):
 
         # dimensions of the sprite
-        # dimensions = f"({int(self.img_width*self.img_width_scale)},{int(self.img_height*self.img_height_scale)})"
+        # dimensions = f"({int(self.img_width*self.spriteWidthScale)},{int(self.img_height*self.spriteHeightScale)})"
 
         # resize or rotate the sprite
         self.resize_and_rotate_sprite()
 
         # animation_frames = list(self.sprite_collection[self.direction].keys())
-        animation_frames = list(SpriteCache[self.img_path][f"({int(self.img_width*self.img_width_scale*gameScreen.windows[self.surface_to_draw_on].zoom)},{int(self.img_height*self.img_height_scale*gameScreen.windows[self.surface_to_draw_on].zoom)})"][self.direction].keys())
+        animation_frames = list(SpriteCache[self.img_path][f"({int(self.spriteWidth*self.spriteWidthScale*gameScreen.windows[self.surface_to_draw_on].zoom)},{int(self.spriteHeight*self.spriteHeightScale*gameScreen.windows[self.surface_to_draw_on].zoom)})"][self.direction].keys())
 
         # sprite_index = (self.animation_count//self.animation_delay) % len(animation_frames)
 
@@ -278,8 +298,8 @@ class AnimatedSprite():
         self.load_or_update_image()
 
         # determine scaled img width and height
-        scaled_width = int(self.img_width*self.img_width_scale*gameScreen.windows[self.surface_to_draw_on].zoom)
-        scaled_height = int(self.img_height*self.img_height_scale*gameScreen.windows[self.surface_to_draw_on].zoom)
+        scaled_width = int(self.spriteWidth*self.spriteWidthScale*gameScreen.windows[self.surface_to_draw_on].zoom)
+        scaled_height = int(self.spriteHeight*self.spriteHeightScale*gameScreen.windows[self.surface_to_draw_on].zoom)
 
         
 
@@ -313,6 +333,11 @@ class AnimatedSprite():
         # self.mask = pygame.mask.from_surface(self.sprite)
         # self.hitbox.width,self.hitbox.height = self.sprite.get_width(),self.sprite.get_height()
 
+
+
+    # function to get hitbox based on current frame
+    def get_hitbox(self):
+        pass
 
     def draw_surface(self,asset_type:str='surface',game_object_origin:str='game',is_animated:bool=False,schedule_deletion:bool=True,
                        animation_length:int=0,position:tuple=(0,0),value:int=0,is_critical:bool=False,initial_width:int=0,initial_height:int=0,
