@@ -472,7 +472,7 @@ class Bullet(Moveable_Object):
     # handle collision damage etc
     def handle_collision(self,game_object:object,axis:str):
 
-        if not self.is_active:
+        if not self.is_active or not game_object.is_active:
             return
 
         # set damage variable by checking if there was a crit
@@ -531,6 +531,7 @@ class Bullet(Moveable_Object):
 
         if gameobj.health <= 0:
             self.projectile_manager.wielded_by.money += self.moneyOnKill
+            gameobj.is_active = False
 
         elif gameobj.health > 0:
             self.projectile_manager.wielded_by.money += self.moneyOnHit

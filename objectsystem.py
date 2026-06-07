@@ -20,7 +20,7 @@ class ObjectSystem():
         # set player
         self.player = None
                 
-    # run update function for all game objects
+    # run update function for all game objects that are not background 
     def update_game_objects(self):
 
         if self.active_pool:
@@ -47,6 +47,32 @@ class ObjectSystem():
                         self.active_pool.remove(gameobj)
                         self.inactiveNoPool.append(gameobj)
 
+    # update background objs
+    def update_background_objects(self):
+
+        # go through each open chunk
+        for chunk in tilemapProcessor.openChunks:
+
+            toRemove = []
+            
+            # go through eahch bj object in 
+            for bgobj in tilemapProcessor.chunkObj[chunk]:
+
+                bgobj.update()
+
+                if not bgobj.is_active:
+                    toRemove.append(bgobj)
+
+            # remove inactive objects
+            if toRemove:
+                for bgobj in toRemove:
+
+                    tilemapProcessor.inactiveObjs.append(bgobj)
+                    tilemapProcessor.chunkObj[chunk].remove(bgobj)
+
+
+
+
     def add_chunk(self,chunk:int):
 
         if chunk not in tilemapProcessor.openChunks:
@@ -54,9 +80,43 @@ class ObjectSystem():
 
             for bbj in tilemapProcessor.chunkObj[chunk]:
                 bbj.init()
-                bbj.spawnL()
-                
-            self.active_pool.extend(tilemapProcessor.chunkObj[chunk])
+                bbj.spawn(pos=bbj.spawnLocation,vertex='topleft')
+
+    # update the active pool based on which open chunks/accessible chunks we have
+    def update_active_pool(self):
+
+        # get to remove
+        toRemove = []
+
+        # go throiugh eveyrthing currently in the active pool
+        for gobj in self.active_pool:
+
+            # if its chunk is not the current in frame chunks then remove it 
+            if gobj.currentChunk not in tilemapProcessor.chunksInFrame:
+
+                signal = gobj.out_of_frame()
+
+                # signals can be kill save etc
+                if signal == 'kill':
+
+                    toRemove.append(gobj)
+
+
+        # if to remove then remove
+        if toRemove:
+            for gobj in toRemove:
+                self.active_pool.remove(toRemove)
+
+
+
+        # now loop through chunks and add gobjs that are not currently in 
+
+                    
+
+
+
+
+        pass
 
     # def draw_tilemap(self):
 

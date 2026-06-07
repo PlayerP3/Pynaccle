@@ -7,16 +7,18 @@ class Tilemap():
 
 
         self.accessible_tiles = []
-        self.inacessible_tiles = []
+        self.inaccessible_tiles = []
         self.tilemap = {}
         self.astar_graph = {}
 
         # chunk vars
         self.currentChunk = "0"
         self.openChunks = ["0"]
+        self.chunksInFrame = ["0"]
 
         # objects and the chunks they are on
         self.chunkObj = {}
+        self.inactiveObjs = []
 
     def load_tilemap(self,tileampJSONDir:str,classMappings:dict):
 
@@ -67,7 +69,7 @@ class Tilemap():
                 layer = lp[0]
                 pos = lp[1]
 
-                # get wallss
+                # get wallss change later
                 if params[chunkNo][layer][pos]['AnimatedSprite']['img_path'].split('/')[-1] == 'Wall.png':
                     params[chunkNo][layer][pos]['class'] = 'Wall'
 
@@ -77,7 +79,7 @@ class Tilemap():
                 classConversion = params[chunkNo][layer][pos]['class']
                 del params[chunkNo][layer][pos]['class']
 
-                # get sprite obj
+                # get obj attributes
                 objinit = params[chunkNo][layer][pos]
 
                 buildJSON.update(objinit['AnimatedSprite'])
@@ -93,7 +95,8 @@ class Tilemap():
 
                 # sprite.surface_to_draw_on = 'tilemap'
                 # sprite.vertice = 'topleft'
-                newObj.hurtbox.topleft= ast.literal_eval(pos)
+
+                newObj.vertice = 'topleft'
                 newObj.zlayer_drawing = int(layer)
                 newObj.spawnLocation = ast.literal_eval(pos)
 
@@ -109,41 +112,54 @@ class Tilemap():
 
                 
                 # determine what happens to different objs
+                # newObj.hurtbox.topleft = ast.literal_eval(pos)
+                # all bg tiles are drawn at the topleft vertice
                 if className == 'BgTile':
 
                     newObj.surface_to_draw_on = chunk
                     newObj.init_sprite()
 
-                    posss = ast.literal_eval(pos)
+                    position = ast.literal_eval(pos)
 
                     # if posss == (0,0):
                     #     continue
                     newObj.draw_surface(position=ast.literal_eval(pos),schedule_deletion=False)
 
-                    # objectManager.active_pool.append(newObj)
-                    # gameScreen.bgSurface['Chunk1'].blit(newObj.sprite,pos)
+                    # add to accessible tiles
+                    self.accessible_tiles.append(position)
                 
 
+                # otherwise if its any other type of obj
                 else:
 
-                    # if className in ['Door','Wallbuy']:
-                    #     print(pos)
-                    #     sys.exit()
+                    # add offset to center hurtbox
+                    # newObj.hurtboxOffsetX = 16
+                    # newObj.hurtboxOffsetY = 16
 
-
-                    newObj.is_active = True
+                    # set connected chunk
                     newObj.connectedChunk = chunkNo
 
                     # store objs
                     self.chunkObj[chunkNo].append(newObj)
-
-                    # objectManager.active_pool.append(newObj)
+                    
+                    # add pos to inaccessible tiles for pathfinding 
+                    self.inaccessible_tiles.append(ast.literal_eval(pos))
 
                     # if door attach connected chunk
                     if className == 'Door':
 
                         newObj.connectedChunk = "1"
+                        # newObj.hurtbox_width = 28
+                        # newObj.hurtbox_height = 32
+                        # newObj.hurtboxOffsetX = 16
+                        # newObj.hurtboxOffsetY = 32
 
+                    if className == 'Wall':
+                        newObj.hurtbox_width = 28
+                        newObj.hurtbox_height = 32
+                        
+
+            # render 
             gameScreen.windows[chunk].render_objects()
 
 

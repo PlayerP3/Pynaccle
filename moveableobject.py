@@ -358,20 +358,24 @@ class Moveable_Object(AnimatedSprite):
 
             
     # spawn function
-    def spawn(self,pos:tuple):
+    def spawn(self,pos:tuple,vertex:str="center"):
 
         self.is_active = True
-        self.hurtbox.center = pos
 
-        
+        if vertex == "center":
+            self.hurtbox.center = (pos[0]+self.hurtboxOffsetX,pos[1]+self.hurtboxOffsetY)
 
-    def spawnL(self):
-        self.hurtbox.center = self.spawnLocation
-        # if self.__class__.__name__ == 'Door':
-        #     self.hitbox.center = self.spawnLocation
-        #     self.is_active = True
-        #     self.update_position()
-        #     print(self.hurtbox.center)
+        elif vertex == "topleft":
+            self.hurtbox.topleft = (pos[0]+self.hurtboxOffsetX,pos[1]+self.hurtboxOffsetY)
+
+    # move function
+    def move_to(self,pos:tuple,vertex:str="center"):
+
+        if vertex == "center":
+            self.hurtbox.center = pos
+
+        elif vertex == "topleft":
+            self.hurtbox.topleft = pos
 
 
     # # finding direction vector function, when you have a specific point
@@ -792,7 +796,7 @@ class Moveable_Object(AnimatedSprite):
         self.direction_vectorY = 0
         self.collision_vector = Vector2(0,0)
 
-
+    
 
     # wall collision check
     def collision_check(self,axis:str='y'):
@@ -809,6 +813,7 @@ class Moveable_Object(AnimatedSprite):
         # sys.exit()
         # go through all possible game objects
         for game_object in self.surrounding_game_objects:
+
 
             # if game_object.__class__.__name__ == 'Door':
             #     sys.exit()
@@ -1342,8 +1347,10 @@ class Moveable_Object(AnimatedSprite):
 
                 self.apply_damage(gameobj=gobj,damage=self.damage)
                 
-
-
+    # what to do with object when not in frame
+    def out_of_frame(self):
+        
+        return 'kill'
 
     def apply_powerup_effect(self,pup:object):
 
