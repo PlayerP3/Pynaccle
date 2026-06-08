@@ -1,5 +1,6 @@
-from game import engine
-from statemachine import *
+
+x = "Users\Player3\Desktop\Pynaccle\Games\Zombies\Sprites\Miscellaneous\Floor\Floor_32x32.png"
 
 
-print(engine)
+y = x.replace('\\','/')
+print(y)

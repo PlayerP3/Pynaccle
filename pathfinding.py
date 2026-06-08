@@ -704,6 +704,7 @@ class Pathfinding():
 
 
     def draw_pathing(self):
+        return
 
         if len(self.pathing) >= 2:
 

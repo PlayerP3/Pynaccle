@@ -15,7 +15,7 @@ class AnimatedSprite():
                  hurtbox_width:float=32,hurtbox_height:float=32,sprite_offsetx:float=0,sprite_offsety:float=0,spawnOffsetX:float=0,spawnOffsetY:float=0,
                  text_colour:str='green',surface_to_draw_on:str='win',penToUse='arial15',ignoreCameraOffset:bool=False,
 
-                 name:str='AnimatedSprite',img_path:str=os.path.join(os.path.dirname(__file__),'Sprites','Cards','Hearts','1.png'),img_width:int=32,img_width_scale:int=1,img_height:int=32,img_height_scale:int=1,
+                 name:str='AnimatedSprite',img_path:str=os.path.join(os.path.dirname(__file__),'Sprites','Cards','Hearts','1_23x36.png'),img_width:int=32,img_width_scale:int=1,img_height:int=32,img_height_scale:int=1,
                  spriteWidth:float=32,spriteWidthScale:float=1,spriteHeight:float=32,spriteHeightScale:float=1,hasSpriteSheet:bool=False,animation_delay:int=1,animation_speed:float=1,alpha:int=255,
 
                  draw_sine_wave_speed:float=1,draw_sine_wave_amplitude:float=1,
@@ -149,9 +149,17 @@ class AnimatedSprite():
                 self.img_width = self.image.get_width()
                 self.img_height = self.image.get_height()
 
-                if not self.hasSpriteSheet:
+                if not self.is_text:
+                    # breakdown image path to get sprite width and height
+                    spriteName,whSprite = self.img_path.rstrip('.png').split('_')
+
+                    self.spriteWidth,self.spriteHeight = [int(x) for x in whSprite.split('x')]
+
+                elif self.is_text:
                     self.spriteWidth = self.img_width
                     self.spriteHeight = self.img_height
+
+                
 
 
         # load image and store it in json if it does not exist
@@ -163,9 +171,9 @@ class AnimatedSprite():
                 self.img_width = self.image.get_width()
                 self.img_height = self.image.get_height()
 
-                if not self.hasSpriteSheet:
-                    self.spriteWidth = self.img_width
-                    self.spriteHeight = self.img_height
+                # breakdown image path to get sprite width and height
+                spriteName,whSprite = self.img_path.rstrip('.png').split('_')
+                self.spriteWidth,self.spriteHeight = [int(x) for x in whSprite.split('x')]
 
             elif self.is_text:
                 self.create_text_image()

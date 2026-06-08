@@ -69,9 +69,9 @@ class Tilemap():
                 layer = lp[0]
                 pos = lp[1]
 
-                # get wallss change later
-                if params[chunkNo][layer][pos]['AnimatedSprite']['img_path'].split('/')[-1] == 'Wall.png':
-                    params[chunkNo][layer][pos]['class'] = 'Wall'
+                # # get wallss change later
+                # if params[chunkNo][layer][pos]['AnimatedSprite']['img_path'].split('/')[-1] == 'Wall.png':
+                #     params[chunkNo][layer][pos]['class'] = 'Wall'
 
 
                 # get class to convert to
