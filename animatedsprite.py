@@ -12,7 +12,7 @@ TextSprites = {}
 class AnimatedSprite():
 
     def __init__(self,zlayer_drawing:int=0,rect_colour:str='red',object_of_origin:str='Game',rect_width:float=23,rect_height:float=36,
-                 hurtbox_width:float=32,hurtbox_height:float=32,sprite_offsetx:float=0,sprite_offsety:float=0,hurtboxOffsetX:float=0,hurtboxOffsetY:float=0,
+                 hurtbox_width:float=32,hurtbox_height:float=32,sprite_offsetx:float=0,sprite_offsety:float=0,spawnOffsetX:float=0,spawnOffsetY:float=0,
                  text_colour:str='green',surface_to_draw_on:str='win',penToUse='arial15',ignoreCameraOffset:bool=False,
 
                  name:str='AnimatedSprite',img_path:str=os.path.join(os.path.dirname(__file__),'Sprites','Cards','Hearts','1.png'),img_width:int=32,img_width_scale:int=1,img_height:int=32,img_height_scale:int=1,
@@ -46,8 +46,8 @@ class AnimatedSprite():
         self.alpha_timer = Timer()
         self.sprite_offsetx = sprite_offsetx
         self.sprite_offsety = sprite_offsety
-        self.hurtboxOffsetX = hurtboxOffsetX
-        self.hurtboxOffsetY = hurtboxOffsetY
+        self.spawnOffsetX = spawnOffsetX
+        self.spawnOffsetY = spawnOffsetY
         self.spawnLocation = (0,0)
         
 
@@ -348,7 +348,7 @@ class AnimatedSprite():
         # update sprite
         self.update_sprite()
 
-        position = (position[0]+self.sprite_offsetx,position[1]+(self.sprite_offsety))
+        position = (position[0]+self.sprite_offsetx,position[1]+self.sprite_offsety)
 
         pos_rect = None
 

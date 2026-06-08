@@ -85,12 +85,7 @@ class Engine(GameStateMachine):
 
         # process tilemap
         self.tilemapProcessor.load_tilemap(tileampJSONDir=tilemapJSONDir,classMappings=classMappings)
-
-        # add object to object manager based on chunk
-        for c in self.tilemapProcessor.openChunks:
-
-            self.objectManager.active_pool.extend(self.tilemapProcessor.chunkObj[c])
-
+        
 
     def run(self):
 

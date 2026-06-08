@@ -43,7 +43,7 @@ class Moveable_Object(AnimatedSprite):
 
                  score_multiplier:int=1,action_every_X_frames:float=1,
 
-                 ranged_dot_effects:dict={}):
+                 ranged_dot_effects:dict={},inaccessible:bool=True):
 
         
 
@@ -151,6 +151,7 @@ class Moveable_Object(AnimatedSprite):
         self.allowed_collisions = allowed_collisions
         self.can_collide = can_collide
         self.collision_type = collision_type
+        self.inaccessible = inaccessible
 
         # movement vectoirs stored here
         self.movement_vectors = {} # array of dictionary with keys direction vector X, direction vector Y, and acceleration
@@ -358,15 +359,15 @@ class Moveable_Object(AnimatedSprite):
 
             
     # spawn function
-    def spawn(self,pos:tuple,vertex:str="center"):
+    def spawn(self,pos:tuple,vertice:str="center"):
 
         self.is_active = True
 
-        if vertex == "center":
-            self.hurtbox.center = (pos[0]+self.hurtboxOffsetX,pos[1]+self.hurtboxOffsetY)
+        if vertice == "center":
+            self.hurtbox.center = (pos[0]+self.spawnOffsetX,pos[1]+self.spawnOffsetY)
 
-        elif vertex == "topleft":
-            self.hurtbox.topleft = (pos[0]+self.hurtboxOffsetX,pos[1]+self.hurtboxOffsetY)
+        elif vertice == "topleft":
+            self.hurtbox.topleft = (pos[0]+self.spawnOffsetX,pos[1]+self.spawnOffsetY)
 
     # move function
     def move_to(self,pos:tuple,vertex:str="center"):
@@ -800,6 +801,8 @@ class Moveable_Object(AnimatedSprite):
 
     # wall collision check
     def collision_check(self,axis:str='y'):
+        if self.__class__.__name__ == "Wall":
+            return
         
         # find surrounding objects
         self.find_surrounding_game_objects()  

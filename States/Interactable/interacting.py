@@ -47,8 +47,8 @@ class Interacting(State):
 
 
         # draw surface
-        self.parent_node.draw_surface(position=self.parent_node.hurtbox.topleft)
-        self.parent_node.draw_rect(position=self.parent_node.hurtbox.topleft)
+        self.parent_node.draw_surface(position=self.parent_node.spawnLocation)
+        # self.parent_node.draw_rect(position=self.parent_node.spawnLocation)
 
 
 

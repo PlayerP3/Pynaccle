@@ -96,9 +96,11 @@ class Tilemap():
                 # sprite.surface_to_draw_on = 'tilemap'
                 # sprite.vertice = 'topleft'
 
+                # set new vars
                 newObj.vertice = 'topleft'
                 newObj.zlayer_drawing = int(layer)
                 newObj.spawnLocation = ast.literal_eval(pos)
+                newObj.connectedChunk = chunkNo
 
                 # start building copy
                 if layer not in self.tilemap[chunkNo]:
@@ -119,52 +121,41 @@ class Tilemap():
                     newObj.surface_to_draw_on = chunk
                     newObj.init_sprite()
 
-                    position = ast.literal_eval(pos)
-
                     # if posss == (0,0):
                     #     continue
                     newObj.draw_surface(position=ast.literal_eval(pos),schedule_deletion=False)
 
                     # add to accessible tiles
-                    self.accessible_tiles.append(position)
+                    self.accessible_tiles.append(ast.literal_eval(pos))
                 
-
-                # otherwise if its any other type of obj
+                
+                # if it is not jsut an animated sprite bg tile
                 else:
 
-                    # add offset to center hurtbox
-                    # newObj.hurtboxOffsetX = 16
-                    # newObj.hurtboxOffsetY = 16
+                    # set spawn offset
+                    newObj.spawnOffsetX = 16
+                    newObj.spawnOffsetY = 16
 
-                    # set connected chunk
-                    newObj.connectedChunk = chunkNo
-
-                    # store objs
+                    # store obj
                     self.chunkObj[chunkNo].append(newObj)
-                    
-                    # add pos to inaccessible tiles for pathfinding 
-                    self.inaccessible_tiles.append(ast.literal_eval(pos))
-
-                    # if door attach connected chunk
-                    if className == 'Door':
-
-                        newObj.connectedChunk = "1"
-                        # newObj.hurtbox_width = 28
-                        # newObj.hurtbox_height = 32
-                        # newObj.hurtboxOffsetX = 16
-                        # newObj.hurtboxOffsetY = 32
-
-                    if className == 'Wall':
-                        newObj.hurtbox_width = 28
-                        newObj.hurtbox_height = 32
                         
 
             # render 
             gameScreen.windows[chunk].render_objects()
 
+    # init and add a chunk
+    def add_chunk(self,chunk:int):
 
+        if chunk not in self.openChunks:
+            self.openChunks.append(chunk)
 
-            
+            for gameobj in self.chunkObj[chunk]:
+                gameobj.init()
+                gameobj.spawn(pos=gameobj.spawnLocation,vertice='center')
+
+                # if inaccessible then add to inaccessible tiles
+                if gameobj.inaccessible:
+                    self.inaccessible_tiles.append(gameobj.spawnLocation)
 
 
         
