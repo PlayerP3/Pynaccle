@@ -5,12 +5,14 @@ from .animatedsprite import AnimatedSprite
 from .globs import delta,FPS
 from .objectsystem import objectManager
 from .utils import *
+from .hitbox import *
 import random
 import math
 import json
 import string
 import copy
 import numpy as np
+
 # from A_star_search_algorithm import *
 
 # pygame.font.init()
@@ -219,6 +221,9 @@ class Moveable_Object(AnimatedSprite):
         # set total health
         self.total_health = self.health
 
+        # load hitboxes
+        self.load_hitboxes()
+
 
         super().init_sprite()
         
@@ -293,6 +298,32 @@ class Moveable_Object(AnimatedSprite):
             self.direction_vectorX = 0
             self.direction_vectorY = 0
 
+    def load_hitboxes(self):
+
+        if self.img_path in hitboxSystem.metaData:
+
+            # get new dict of frame and hitboxes
+            boxes = {k:v for k,v in hitboxSystem.metaData[self.img_path].items()}
+            out = {}
+
+            # loop through each frame and the hitboxes it comes with
+            for frame,storedHitboxes in boxes.items():
+
+                # add new frame
+                self.hitboxes[int(frame)] = []
+
+                # add each hitbox to the boxes
+                for indvBox in storedHitboxes:
+
+                    splitvars = [float(x) for x in indvBox.split(',')]
+
+                    newBox = Hitbox(*splitvars,frameNumber=int(frame))
+
+                    self.hitboxes[int(frame)].append(newBox)
+
+
+
+            print(self.hitboxes)
 
     # kill object
     def kill(self,active_pool:list,inactive_pool:list):
@@ -801,6 +832,7 @@ class Moveable_Object(AnimatedSprite):
 
     # wall collision check
     def collision_check(self,axis:str='y'):
+
         if self.__class__.__name__ == "Wall":
             return
         
@@ -817,31 +849,34 @@ class Moveable_Object(AnimatedSprite):
         # go through all possible game objects
         for game_object in self.surrounding_game_objects:
 
+            # if wall/door use hirtbox collision instead of hitbox
+            if game_object.__class__.__name__ in ['Door','Wall']:
 
-            # if game_object.__class__.__name__ == 'Door':
-            #     sys.exit()
-
-            # rect collision check
-            if self.hurtbox.colliderect(game_object.hurtbox):
-
-                # sprite collision check
-                # if self.mask.overlap(game_object.mask,(game_object.hurtbox.left-self.hurtbox.left,game_object.hurtbox.top-self.hurtbox.top)):
-
-                # handle collision
-                self.handle_collision(game_object=game_object,axis=axis)
-
-            if self.__class__.__name__ == 'Door':
-         
                 # rect collision check
-                if self.hitbox.colliderect(game_object.hurtbox):
-
-    
-                    # sprite collision check
-                    # if self.mask.overlap(game_object.mask,(game_object.hurtbox.left-self.hurtbox.left,game_object.hurtbox.top-self.hurtbox.top)):
+                if self.hurtbox.colliderect(game_object.hurtbox):
 
                     # handle collision
                     self.handle_collision(game_object=game_object,axis=axis)
 
+
+            else:
+                collision = False
+                
+                # check for collision with hitboxes
+                for hitBox in self.hitboxes[self.currentFrame]:
+                    
+                    if hitBox.collided(self.hurtbox.center,game_object):
+                        collision = True
+                        break
+
+                if collision:
+                    self.handle_collision(game_object=game_object,axis=axis)
+
+                    
+
+
+
+           
 
                 
 

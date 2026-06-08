@@ -6,6 +6,7 @@ from .timer import Timer
 from .screen import gameScreen
 from .pens import *
 
+
 GameSprites = {}
 TextSprites = {}
 
@@ -39,6 +40,7 @@ class AnimatedSprite():
         # set sprite
         self.hasSpriteSheet = hasSpriteSheet
         self.sprite = None
+        self.currentFrame = 0
         self.image = None
         self.mask = None
         self.mask_img = None
@@ -140,6 +142,7 @@ class AnimatedSprite():
         return sprite_collection
     
     def load_or_update_image(self,SpriteCache:dict=GameSprites):
+        
 
         # load image from memory if it is in json already
         if self.img_path in SpriteCache:
