@@ -43,7 +43,7 @@ class Moveable_Object(AnimatedSprite):
 
                  max_acceleration:float=1,min_acceleration:float=0,invincibility_duration:float=0,
 
-                 score_multiplier:int=1,action_every_X_frames:float=1,
+                 score_multiplier:int=1,action_every_X_frames:float=1,connectedChunk:str="0",
 
                  ranged_dot_effects:dict={},inaccessible:bool=True):
 
@@ -160,6 +160,7 @@ class Moveable_Object(AnimatedSprite):
 
         # positional variables
         self.current_tile_position = (0,0)
+        self.connectedChunk = connectedChunk
 
         # score variables
         self.score = score
@@ -321,9 +322,6 @@ class Moveable_Object(AnimatedSprite):
 
                     self.hitboxes[int(frame)].append(newBox)
 
-
-
-            print(self.hitboxes)
 
     # kill object
     def kill(self,active_pool:list,inactive_pool:list):
@@ -835,7 +833,8 @@ class Moveable_Object(AnimatedSprite):
 
         if self.__class__.__name__ == "Wall":
             return
-        
+
+
         # find surrounding objects
         self.find_surrounding_game_objects()  
 
@@ -849,8 +848,13 @@ class Moveable_Object(AnimatedSprite):
         # go through all possible game objects
         for game_object in self.surrounding_game_objects:
 
+            if not game_object.can_collide:
+                continue
+
             # if wall/door use hirtbox collision instead of hitbox
-            if game_object.__class__.__name__ in ['Door','Wall']:
+            if array_is_in_array(get_mro(gameObject=game_object),['Wall','Interactable']): 
+
+            # if game_object.__class__.__name__ in ['Door','Wall']:
 
                 # rect collision check
                 if self.hurtbox.colliderect(game_object.hurtbox):
@@ -870,14 +874,13 @@ class Moveable_Object(AnimatedSprite):
                         break
 
                 if collision:
+
                     self.handle_collision(game_object=game_object,axis=axis)
 
                     
 
 
-
-           
-
+    # extra collision processing 
                 
 
     # handle collision once the check is confirmed

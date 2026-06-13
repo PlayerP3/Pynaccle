@@ -426,6 +426,34 @@ class AnimatedSprite():
                                                       'alpha_value':255,
                                                       'rect_colour':rect_colour,
                                                       'schedule_deletion':schedule_deletion}
+        
+    def draw_hitbox(self,asset_type:str='rect',game_object_origin:str='game',schedule_deletion:bool=True,
+                  is_animated:bool=False,animation_length:int=0,position:tuple=(0,0),value:int=0,is_critical:bool=False,rect_colour:str='blue',
+                  zlayer:int=1):
+
+        
+        gameScreen.windows[self.surface_to_draw_on].drawing_queue[f"{id(self)}_rect"] = {'game_object':self,
+                                                      'asset_to_draw':self.hitboxes[0][0].hitbox,
+                                                      'asset_type':asset_type,
+                                                      'z_layer':zlayer,
+                                                      'surface_to_draw_on':self.surface_to_draw_on,
+                                                      'game_object_origin':game_object_origin,
+                                                      'is_animated':is_animated,
+                                                      'animation_length':animation_length,
+                                                      'animation_timer':animation_length,
+                                                      'position':position,
+                                                      'position_rect':None,
+                                                      'value':value,
+                                                      'is_critical':is_critical,
+                                                      'sin_waveY':math.radians(90),
+                                                      'sin_waveX':0,
+                                                      'sin_waveX_movement':random.choice(['positive','negative']),
+                                                      'initial_width':None,
+                                                      'initial_height':None,
+                                                      'scale_factor_timer':1,
+                                                      'alpha_value':255,
+                                                      'rect_colour':rect_colour,
+                                                      'schedule_deletion':schedule_deletion}
 
 
 

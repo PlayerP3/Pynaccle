@@ -87,7 +87,10 @@ class Tilemap():
                 buildJSON.update(objinit)
 
                 # add variables of interest from the animated sprite class, can actuall use getattr to be more efficient and have a list of vars you want
-                
+                if "spawnOffsetX" not in buildJSON:
+                    buildJSON["spawnOffsetX"] = 16
+                    buildJSON["spawnOffsetY"] = 16
+
                 # init obj absed on its class and set attrs
                 newObj = classMappings[classConversion]()
                 for att,val in buildJSON.items():
@@ -132,10 +135,6 @@ class Tilemap():
                 # if it is not jsut an animated sprite bg tile
                 else:
 
-                    # set spawn offset
-                    newObj.spawnOffsetX = 16
-                    newObj.spawnOffsetY = 16
-
                     # store obj
                     self.chunkObj[chunkNo].append(newObj)
                         
@@ -157,6 +156,20 @@ class Tilemap():
                 if gameobj.inaccessible:
                     self.inaccessible_tiles.append(gameobj.spawnLocation)
 
+                elif not gameobj.inaccessible:
+                    self.accessible_tiles.append(gameobj.spawnLocation)
 
-        
+    # return objects of certain class
+    def get_obejcts(self,className:str):
+
+        gameObjects = []
+
+        for chunk in self.chunkObj:
+
+            gameObjects.extend(self.chunkObj[chunk])
+
+        gameObjects = [x for x in gameObjects if x.__class__.__name__ == className]
+
+        return gameObjects
+
 tilemapProcessor = Tilemap()

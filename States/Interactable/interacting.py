@@ -29,6 +29,7 @@ class Interacting(State):
         # run move and collide, end condition is in here
         self.parent_node.move_and_collide()
 
+
         # check if player is in colliding objects
         # if pynaccle.player in self.parent_node.surrounding_game_objects:
         #     pass

@@ -1,7 +1,7 @@
 import json,os,pygame
 pygame.init()
 
-myDirs = '/Users/Player3/Desktop/Pynaccle/Games/Zombies/Sprites'
+myDirs = 'Sprites'
 
 potentialDirsPath = [x[0].replace("\\",'/') for x in os.walk(myDirs)]
 myDirsPath = []
@@ -39,7 +39,7 @@ for dd in myDirsPath:
 
 
 
-with open('/Users/Player3/Desktop/Pynaccle/Games/Zombies/configs/config_hitboxes.json','w') as f:
+with open('configs/config_hitboxes.json','w') as f:
 
     json.dump(outJson, f,indent=4)
 

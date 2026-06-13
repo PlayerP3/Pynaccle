@@ -563,7 +563,9 @@ class Bullet(Moveable_Object):
             # draw surface
             self.draw_surface(position=self.hurtbox.center)
 
-            self.draw_rect(position=self.hurtbox.center)
+            # self.draw_rect(position=self.hurtbox.center)
+
+            self.draw_hitbox()
 
             # update movement vars
             self.update_movement()

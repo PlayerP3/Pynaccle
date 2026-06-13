@@ -11,7 +11,7 @@ ctx = moderngl.create_context()
 
 clock = pygame.time.Clock()
 
-img = pygame.image.load('Sprites/Cards/Diamonds/A.png')
+img = pygame.image.load('pynaccle/Sprites/Cards/Hearts/1_23x36.png')
 
 img = pygame.transform.scale_by(img,7)
 
