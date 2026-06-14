@@ -5,12 +5,14 @@ from .animatedsprite import AnimatedSprite
 from .globs import delta,FPS
 from .objectsystem import objectManager
 from .utils import *
+from .hitbox import *
 import random
 import math
 import json
 import string
 import copy
 import numpy as np
+
 # from A_star_search_algorithm import *
 
 # pygame.font.init()
@@ -41,9 +43,9 @@ class Moveable_Object(AnimatedSprite):
 
                  max_acceleration:float=1,min_acceleration:float=0,invincibility_duration:float=0,
 
-                 score_multiplier:int=1,action_every_X_frames:float=1,
+                 score_multiplier:int=1,action_every_X_frames:float=1,connectedChunk:str="0",
 
-                 ranged_dot_effects:dict={}):
+                 ranged_dot_effects:dict={},inaccessible:bool=True):
 
         
 
@@ -151,12 +153,14 @@ class Moveable_Object(AnimatedSprite):
         self.allowed_collisions = allowed_collisions
         self.can_collide = can_collide
         self.collision_type = collision_type
+        self.inaccessible = inaccessible
 
         # movement vectoirs stored here
         self.movement_vectors = {} # array of dictionary with keys direction vector X, direction vector Y, and acceleration
 
         # positional variables
         self.current_tile_position = (0,0)
+        self.connectedChunk = connectedChunk
 
         # score variables
         self.score = score
@@ -217,6 +221,9 @@ class Moveable_Object(AnimatedSprite):
 
         # set total health
         self.total_health = self.health
+
+        # load hitboxes
+        self.load_hitboxes()
 
 
         super().init_sprite()
@@ -292,6 +299,45 @@ class Moveable_Object(AnimatedSprite):
             self.direction_vectorX = 0
             self.direction_vectorY = 0
 
+    def load_hitboxes(self):
+
+        if self.img_path in hitboxSystem.metaData:
+
+            # get new dict of frame and hitboxes
+            boxes = {k:v for k,v in hitboxSystem.metaData[self.img_path].items()}
+            out = {}
+
+            # loop through each frame and the hitboxes it comes with
+            for frame,storedHitboxes in boxes.items():
+
+                # add new frame
+                self.hitboxes[int(frame)] = []
+
+                # add each hitbox to the boxes
+                for indvBox in storedHitboxes:
+
+                    splitvars = [float(x) for x in indvBox.split(',')]
+
+                    newBox = Hitbox(*splitvars,frameNumber=int(frame))
+
+                    self.hitboxes[int(frame)].append(newBox)
+
+    # check for hitbox collision and return if collisioon true and the htibox that hit
+    def hitbox_collision(self,game_object):
+
+        collision = False
+        hitbox = None
+
+        # check for collision with hitboxes
+        for hitBox in self.hitboxes[self.currentFrame]:
+            
+            if hitBox.collided(self.hurtbox.center,game_object):
+                collision = True
+                break
+
+        return collision,hitbox
+        
+
 
     # kill object
     def kill(self,active_pool:list,inactive_pool:list):
@@ -358,20 +404,24 @@ class Moveable_Object(AnimatedSprite):
 
             
     # spawn function
-    def spawn(self,pos:tuple):
+    def spawn(self,pos:tuple,vertice:str="center"):
 
         self.is_active = True
-        self.hurtbox.center = pos
 
-        
+        if vertice == "center":
+            self.hurtbox.center = (pos[0]+self.spawnOffsetX,pos[1]+self.spawnOffsetY)
 
-    def spawnL(self):
-        self.hurtbox.center = self.spawnLocation
-        # if self.__class__.__name__ == 'Door':
-        #     self.hitbox.center = self.spawnLocation
-        #     self.is_active = True
-        #     self.update_position()
-        #     print(self.hurtbox.center)
+        elif vertice == "topleft":
+            self.hurtbox.topleft = (pos[0]+self.spawnOffsetX,pos[1]+self.spawnOffsetY)
+
+    # move function
+    def move_to(self,pos:tuple,vertex:str="center"):
+
+        if vertex == "center":
+            self.hurtbox.center = pos
+
+        elif vertex == "topleft":
+            self.hurtbox.topleft = pos
 
 
     # # finding direction vector function, when you have a specific point
@@ -792,11 +842,15 @@ class Moveable_Object(AnimatedSprite):
         self.direction_vectorY = 0
         self.collision_vector = Vector2(0,0)
 
-
+    
 
     # wall collision check
     def collision_check(self,axis:str='y'):
-        
+
+        if self.__class__.__name__ == "Wall":
+            return
+
+
         # find surrounding objects
         self.find_surrounding_game_objects()  
 
@@ -810,31 +864,39 @@ class Moveable_Object(AnimatedSprite):
         # go through all possible game objects
         for game_object in self.surrounding_game_objects:
 
-            # if game_object.__class__.__name__ == 'Door':
-            #     sys.exit()
+            if not game_object.can_collide:
+                continue
 
-            # rect collision check
-            if self.hurtbox.colliderect(game_object.hurtbox):
+            # if wall/door use hirtbox collision instead of hitbox
+            if array_is_in_array(get_mro(gameObject=game_object),['Wall','Interactable']): 
 
-                # sprite collision check
-                # if self.mask.overlap(game_object.mask,(game_object.hurtbox.left-self.hurtbox.left,game_object.hurtbox.top-self.hurtbox.top)):
+            # if game_object.__class__.__name__ in ['Door','Wall']:
 
-                # handle collision
-                self.handle_collision(game_object=game_object,axis=axis)
-
-            if self.__class__.__name__ == 'Door':
-         
                 # rect collision check
-                if self.hitbox.colliderect(game_object.hurtbox):
-
-    
-                    # sprite collision check
-                    # if self.mask.overlap(game_object.mask,(game_object.hurtbox.left-self.hurtbox.left,game_object.hurtbox.top-self.hurtbox.top)):
+                if self.hurtbox.colliderect(game_object.hurtbox):
 
                     # handle collision
                     self.handle_collision(game_object=game_object,axis=axis)
 
 
+            else:
+                collision = False
+                
+                # check for collision with hitboxes
+                for hitBox in self.hitboxes[self.currentFrame]:
+                    
+                    if hitBox.collided(self.hurtbox.center,game_object):
+                        collision = True
+                        break
+
+                if collision:
+
+                    self.handle_collision(game_object=game_object,axis=axis)
+
+                    
+
+
+    # extra collision processing 
                 
 
     # handle collision once the check is confirmed
@@ -1214,6 +1276,13 @@ class Moveable_Object(AnimatedSprite):
         # remove duplicates
         self.surrounding_game_objects = list(set(self.surrounding_game_objects))
 
+        # reorder so walls are at the end
+        walls = [x for x in self.surrounding_game_objects if x.__class__.__name__ == 'Wall']
+        nowalls = [x for x in self.surrounding_game_objects if x.__class__.__name__ != 'Wall']
+
+        nowalls.extend(walls)
+        self.surrounding_game_objects = nowalls
+
     # apply damage function, handles death too
     def apply_damage(self,gameobj,damage:float):
 
@@ -1335,8 +1404,10 @@ class Moveable_Object(AnimatedSprite):
 
                 self.apply_damage(gameobj=gobj,damage=self.damage)
                 
-
-
+    # what to do with object when not in frame
+    def out_of_frame(self):
+        
+        return 'kill'
 
     def apply_powerup_effect(self,pup:object):
 

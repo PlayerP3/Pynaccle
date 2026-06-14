@@ -1,12 +1,14 @@
 import pygame,random,os,string,numpy,math,json,copy,ast,sys
 from pygame.math import Vector2
 from .statemachine import StateMachine
+from .hitbox import hitboxSystem
 from .screen import gameScreen
 from .objectsystem import objectManager
 from .eventsystem import eventprocessor
 from .pens import penHolder
 from .tilemap import tilemapProcessor
 from .hud import overlay
+
 
 pygame.font.init()
 
@@ -53,9 +55,12 @@ class Engine(GameStateMachine):
 
         self.gamePath = None
 
+        
+
+
     # def init(self,states:dict={},beginningState:str='START',tilemapPath:str='',classMappings:dict={},player:object=None,tileSize:int=32):
-    def init(self,states:dict={},beginningState:str='SPLASH',tilemapJSON:str='',classMappings:dict={},
-             windows:str='configs/config_window.json'):
+    def init(self,states:dict={},beginningState:str='SPLASH',tilemapJSONDir:str='tilemaps',classMappings:dict={},
+             windows:str='configs/config_window.json',hitboxMetadataJSON:str=''):
 
         # set path to game
         # self.gamePath = gamePath
@@ -81,7 +86,19 @@ class Engine(GameStateMachine):
 
 
         # process tilemap
-        self.tilemapProcessor.load_tilemap(tileampJSON=tilemapJSON,classMappings=classMappings)
+        self.tilemapProcessor.load_tilemap(tileampJSONDir=tilemapJSONDir,classMappings=classMappings)
+
+
+        # load hitbox meta data
+        if hitboxMetadataJSON:
+            with open(hitboxMetadataJSON,'r') as hitboxMetadataFile:
+
+                boxMetadata = json.load(hitboxMetadataFile)
+
+            hitboxSystem.metaData = boxMetadata
+
+
+    
 
     def run(self):
 

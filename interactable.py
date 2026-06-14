@@ -40,6 +40,7 @@ class Interactable(InteractableStateMachine,Moveable_Object):
         self.display_message_text = display_message_text
         self.cost = cost
         self.is_active = False
+        self.interactingObj = None
         # self.progress_bar = ProgressBar(**progressbar_parameters['WallBuy'])
   
 

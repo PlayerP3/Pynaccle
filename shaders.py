@@ -11,7 +11,7 @@ ctx = moderngl.create_context()
 
 clock = pygame.time.Clock()
 
-img = pygame.image.load('Sprites/Cards/Diamonds/A.png')
+img = pygame.image.load('pynaccle/Sprites/Cards/Hearts/1_23x36.png')
 
 img = pygame.transform.scale_by(img,7)
 
@@ -54,7 +54,7 @@ out vec4 f_color;
 
 void main() {
     float xxx = time;
-    vec2 sample_pos = vec2(uvs.x* cos(1*time*0.01) ,uvs.y* cos(1*time*0.01));
+    vec2 sample_pos = vec2(uvs.x ,uvs.y);
     f_color = vec4(texture(tex,sample_pos).r,texture(tex,sample_pos).g ,texture(tex,sample_pos).b,1.0);
 }
 

@@ -29,6 +29,8 @@ def clamp(n:float, min:float, max:float) -> float:
         return max
     else:
         return n
+    
+
 
 # function to find out if an event proced given the percentage chance
 # pro chance is given as a percentage i.e 10% or 50%
@@ -573,3 +575,17 @@ def draw_lines(points:tuple=[(0,0),(1,1)],asset_to_draw=None,asset_type:str='lin
                                                     'alpha_value':255,
                                                     'points':points,
                                                     'schedule_deletion':True}
+
+
+# get mro
+def get_mro(gameObject):
+
+    return [x.__name__ for x in gameObject.__class__.__mro__]
+
+# check if a list is in another list
+def array_is_in_array(array1:list,array2:list):
+
+    # Convert lists to sets and check for intersection
+    return set(array2) & set(array1)
+
+ 
