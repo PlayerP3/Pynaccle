@@ -118,6 +118,15 @@ class Interactable(InteractableStateMachine,Moveable_Object):
                
                self.pay()
 
+    # draw message
+    def draw_message(self,pos:tuple):
+
+        # init sprite
+        self.display_message.init_sprite()
+        
+        # display message
+        self.display_message.draw_surface(position=pos)
+
 
 
 
