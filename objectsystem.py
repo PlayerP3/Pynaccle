@@ -30,6 +30,8 @@ class ObjectSystem():
             for gameobj in self.active_pool:
                 
                 # if not in current chunk then move past it
+                # if gameobj.__class__.__name__ != 'Player':
+                #     continue
 
 
                 gameobj.update()
@@ -47,6 +49,13 @@ class ObjectSystem():
                         self.active_pool.remove(gameobj)
                         self.inactiveNoPool.append(gameobj)
 
+    # add objects to active pool
+    # def add_to_active_pool(self,game_object:object,className:str):
+
+        
+    #     pass
+
+
     # update background objs
     def update_background_objects(self):
 
@@ -59,6 +68,8 @@ class ObjectSystem():
             for bgobj in tilemapProcessor.chunkObj[chunk]:
 
                 bgobj.update()
+
+                # print(bgobj.hurtbox.center)
 
                 if not bgobj.is_active:
                     toRemove.append(bgobj)

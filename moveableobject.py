@@ -322,6 +322,22 @@ class Moveable_Object(AnimatedSprite):
 
                     self.hitboxes[int(frame)].append(newBox)
 
+    # check for hitbox collision and return if collisioon true and the htibox that hit
+    def hitbox_collision(self,game_object):
+
+        collision = False
+        hitbox = None
+
+        # check for collision with hitboxes
+        for hitBox in self.hitboxes[self.currentFrame]:
+            
+            if hitBox.collided(self.hurtbox.center,game_object):
+                collision = True
+                break
+
+        return collision,hitbox
+        
+
 
     # kill object
     def kill(self,active_pool:list,inactive_pool:list):
@@ -854,8 +870,6 @@ class Moveable_Object(AnimatedSprite):
             # if wall/door use hirtbox collision instead of hitbox
             if array_is_in_array(get_mro(gameObject=game_object),['Wall','Interactable']): 
 
-            # if game_object.__class__.__name__ in ['Door','Wall']:
-
                 # rect collision check
                 if self.hurtbox.colliderect(game_object.hurtbox):
 
@@ -1267,6 +1281,18 @@ class Moveable_Object(AnimatedSprite):
         nowalls.extend(walls)
         self.surrounding_game_objects = nowalls
 
+    def filter_surrounding_game_objects(self,classes:list,deep:bool=False):
+
+        # we look at mro 
+        if deep:
+            pass
+
+        elif not deep:
+
+            self.surrounding_game_objects = [x for x in self.surrounding_game_objects if x.__class__.__name__ in classes]
+
+    
+
     # apply damage function, handles death too
     def apply_damage(self,gameobj,damage:float):
 
@@ -1501,7 +1527,7 @@ class DamageNumber(Moveable_Object):
 
         self.init_text_sprite(f"{text}")
         self.init_sprite()
-        self.alpha = 255
+        self.alpha = 1
         self.is_active = True
         self.hurtbox.center = (0,0)
         self.timer_speed = 4

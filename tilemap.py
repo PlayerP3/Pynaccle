@@ -16,7 +16,7 @@ class Tilemap():
         self.openChunks = ["0"]
         self.chunksInFrame = ["0"]
 
-        # objects and the chunks they are on
+        # chunk no and the objs that are in it
         self.chunkObj = {}
         self.inactiveObjs = []
 
@@ -46,7 +46,7 @@ class Tilemap():
 
             # add window for chunk
             # set chunk in bg surf
-            gameScreen.add_window(chunk,width=12000,height=12000,pos=(gameScreen.fullscreen_width//2,gameScreen.fullscreen_height//2),zoom=gameScreen.windows['win'].zoom)
+            gameScreen.add_window(chunk,width=12000,height=12000,pos=(gameScreen.fullscreen_width//2,gameScreen.fullscreen_height//2),zoom=1)
             gameScreen.windows[chunk].bg_offset_x = (gameScreen.windows[chunk].win_width)//2
             gameScreen.windows[chunk].bg_offset_y = (gameScreen.windows[chunk].win_height)//2
 
@@ -87,9 +87,9 @@ class Tilemap():
                 buildJSON.update(objinit)
 
                 # add variables of interest from the animated sprite class, can actuall use getattr to be more efficient and have a list of vars you want
-                if "spawnOffsetX" not in buildJSON:
-                    buildJSON["spawnOffsetX"] = 16
-                    buildJSON["spawnOffsetY"] = 16
+                # if "spawnOffsetX" not in buildJSON:
+                #     buildJSON["spawnOffsetX"] = 16
+                #     buildJSON["spawnOffsetY"] = 16
 
                 # init obj absed on its class and set attrs
                 newObj = classMappings[classConversion]()
@@ -100,7 +100,7 @@ class Tilemap():
                 # sprite.vertice = 'topleft'
 
                 # set new vars
-                newObj.vertice = 'topleft'
+                newObj.vertice = 'center'
                 newObj.zlayer_drawing = int(layer)
                 newObj.spawnLocation = ast.literal_eval(pos)
                 newObj.connectedChunk = chunkNo
@@ -123,7 +123,7 @@ class Tilemap():
 
                     newObj.surface_to_draw_on = chunk
                     newObj.init_sprite()
-
+                    
                     # if posss == (0,0):
                     #     continue
                     newObj.draw_surface(position=ast.literal_eval(pos),schedule_deletion=False)
@@ -140,7 +140,13 @@ class Tilemap():
                         
 
             # render 
-            gameScreen.windows[chunk].render_objects()
+            gameScreen.windows[chunk].render_objects_cpu()
+            gameScreen.windows[chunk].drawing_queue = {}
+
+            # add sprite for chunk obj and add it to objects to blit
+            chunkObj = classMappings['Chunk']()
+            chunkObj.create_chunk_sprite(gameScreen.windows[chunk].win)
+            self.chunkObj[chunkNo].append(chunkObj)
 
     # init and add a chunk
     def add_chunk(self,chunk:int):
@@ -152,6 +158,10 @@ class Tilemap():
                 gameobj.init()
                 gameobj.spawn(pos=gameobj.spawnLocation,vertice='center')
 
+                # if chunk then dont add accessibility
+                if gameobj.__class__.__name__ == 'Chunk':
+                    continue
+                
                 # if inaccessible then add to inaccessible tiles
                 if gameobj.inaccessible:
                     self.inaccessible_tiles.append(gameobj.spawnLocation)

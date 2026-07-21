@@ -1,6 +1,7 @@
-import pygame,random,os,string,numpy
+import pygame,random,os,string,numpy,math,sys
 from .animatedsprite import AnimatedSprite,GameSprites
 from .screen import gameScreen
+from pyglm import glm
 
 class HUD_element(AnimatedSprite):
 
@@ -25,6 +26,8 @@ class HUD_element(AnimatedSprite):
 
         
 
+        
+
         # list of functions we will execute
         self.extraProcessing = []
 
@@ -41,11 +44,13 @@ class HUD_element(AnimatedSprite):
         self.hurtbox.width = self.hurtbox_width
         self.hurtbox.height = self.hurtbox_height
 
-        # calculate win pos based on xpercentage and ypercentage on screen
-        x = (gameScreen.windows[self.surface_to_draw_on].win_width * (self.winPosWidthRatio)) - (gameScreen.windows[self.surface_to_draw_on].win_width * (self.winPosWidthOffsetRatio)) 
-        y = (gameScreen.windows[self.surface_to_draw_on].win_height * (self.winPosHeightRatio)) - (gameScreen.windows[self.surface_to_draw_on].win_height * (self.winPosHeightOffsetRatio)) 
-        
-        self.win_pos = (x/gameScreen.windows[self.surface_to_draw_on].zoom,y/gameScreen.windows[self.surface_to_draw_on].zoom)
+        # calculate win pos based on xpercentage and ypercentage on screen, subtract 
+        # so now width ratio and hgeight ratio ranges from -1 to 1 because it assumes (0,0) as the starting point
+        x = ((- gameScreen.windows[self.surface_to_draw_on].win_width//2) + (gameScreen.windows[self.surface_to_draw_on].win_width * self.winPosWidthRatio))/gameScreen.windows[self.surface_to_draw_on].zoom
+        y = ((- gameScreen.windows[self.surface_to_draw_on].win_height//2) + (gameScreen.windows[self.surface_to_draw_on].win_height * self.winPosHeightRatio))/gameScreen.windows[self.surface_to_draw_on].zoom
+
+        self.win_pos = (x,y)
+
         self.hurtbox.center = self.win_pos
 
         self.original_vars = {k:v for k,v in self.__dict__.items()}
@@ -53,14 +58,42 @@ class HUD_element(AnimatedSprite):
     # function to update some preoprty about the hud
     def update(self):
 
-        self.win_pos
-
         if self.extraProcessing:
 
             for f in self.extraProcessing:
 
                 f(self)
 
+        # draw
+        self.submit_to_render()
+        
+    def set_default_uniforms(self):
+
+        gameScreen.shaderPrograms[self.shader]['memSlot'] = 0
+        gameScreen.shaderPrograms[self.shader]['alpha'] = self.alpha
+        gameScreen.shaderPrograms[self.shader]['screenSize'] = (gameScreen.windows[self.surface_to_draw_on].win_width,gameScreen.windows[self.surface_to_draw_on].win_height)
+        gameScreen.shaderPrograms[self.shader]['spriteSize'] = self.sprite.get_size()
+        gameScreen.shaderPrograms[self.shader]['spriteOffset'] = (self.sprite_offsetx,self.sprite_offsety)
+        gameScreen.shaderPrograms[self.shader]['position'] = (self.hurtbox.center)
+        gameScreen.shaderPrograms[self.shader]['rotation'] = math.radians(float(self.direction))
+        gameScreen.shaderPrograms[self.shader]['bgOffset'] = (0,0)
+        gameScreen.shaderPrograms[self.shader]['zoom'] = self.zoom
+        gameScreen.shaderPrograms[self.shader]['screenZoom'] = gameScreen.windows[self.surface_to_draw_on].zoom
+
+
+    def set_shader_dependent_uniforms(self):
+        
+        return
+        
+
+    def new_zoom_position(self):
+
+        x = ((- gameScreen.windows[self.surface_to_draw_on].win_width//2) + (gameScreen.windows[self.surface_to_draw_on].win_width * self.winPosWidthRatio))/gameScreen.windows[self.surface_to_draw_on].zoom
+        y = ((- gameScreen.windows[self.surface_to_draw_on].win_height//2) + (gameScreen.windows[self.surface_to_draw_on].win_height * self.winPosHeightRatio))/gameScreen.windows[self.surface_to_draw_on].zoom
+
+        self.win_pos = (x,y)
+
+        self.hurtbox.center = self.win_pos
 
 class HUD():
 
@@ -90,18 +123,14 @@ class HUD():
 
             for hud_element in self.hud_elements[group]:
 
-                
-
                 if hud_element.display:
 
                     hud_element.update()
-                    hud_element.draw_surface(position=hud_element.hurtbox.center)
+                    # self.parent_node.submit_to_render()
+                    # hud_element.draw_surface(position=hud_element.hurtbox.center)
 
                     # draw rect for debugging 
-                    hud_element.draw_rect()
-
-                    
-
+                    # hud_element.draw_rect()
 
                     self.active_elements.append(hud_element)
 
@@ -123,6 +152,8 @@ class HUD():
             for hudElement in self.hud_elements[group]:
 
                 hudElement.display = True
+
+                hudElement.new_zoom_position()
         
 
 

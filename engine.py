@@ -8,6 +8,8 @@ from .eventsystem import eventprocessor
 from .pens import penHolder
 from .tilemap import tilemapProcessor
 from .hud import overlay
+from .inventory import gameInventory
+# from .shaders import context
 
 
 pygame.font.init()
@@ -49,6 +51,7 @@ class Engine(GameStateMachine):
         self.penHolder = penHolder
         self.tilemapProcessor = tilemapProcessor
         self.overlay = overlay
+        self.inventory = gameInventory
 
         # create vars
         self.tileSize = None
@@ -64,6 +67,9 @@ class Engine(GameStateMachine):
 
         # set path to game
         # self.gamePath = gamePath
+
+        # load shaders
+        # self.context.load_shaders(shaderDir)
 
         # set states
         self.states = states
@@ -81,9 +87,10 @@ class Engine(GameStateMachine):
             winParams = json.load(winConfig)
 
             for winName in winParams:
+                
                 self.screenManager.add_window(winName=winName,width=winParams[winName]["width"],height=winParams[winName]["height"],
-                                              zoom=winParams[winName]["zoom"],pos=(self.screenManager.fullscreen_width//2,self.screenManager.fullscreen_height//2))
-
+                                              zoom=winParams[winName]["zoom"],pos=(self.screenManager.fullscreen_width//2,self.screenManager.fullscreen_height//2),
+                                              stateZoom=winParams[winName]["stateZoom"])
 
         # process tilemap
         self.tilemapProcessor.load_tilemap(tileampJSONDir=tilemapJSONDir,classMappings=classMappings)
@@ -97,6 +104,8 @@ class Engine(GameStateMachine):
 
             hitboxSystem.metaData = boxMetadata
 
+
+    
 
     
 

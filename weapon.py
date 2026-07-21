@@ -14,15 +14,21 @@ class Weapon():
 
     def __init__(self,name:str='Weapon',magazine_size:int=8,total_ammo_stock:int=0,select_fire:str='fullauto',
                  
-                fire_rate:float=2,reload_speed:float=3,triggerResetSpeed:float=0,
+                fire_rate:float=2,reload_speed:float=3,triggerResetSpeed:float=0,weight:float=0.1,
                 
                 casted_rays:int=2,raycast_depth:int=1,raycast_width:int=1,raycast_angle_offset:int=0,
                 
-                shot_spread_pattern:str='perfect',shot_spread_number:int=0,is_dual_wield:bool=False):
+                shot_spread_pattern:str='perfect',shot_spread_number:int=0,is_dual_wield:bool=False,dualWieldCopy:str='same',img_path:str=''):
 
         self.name = name
+        self.weight = weight
+
+        # if same we keep the same gun obj and just have a different sprite where bullets come out from
+        # if unique we make a new weapon for the right hand
+        self.dualWieldCopy = dualWieldCopy
 
 
+        self.img_path = img_path
         self.fire_rate = fire_rate
         self.reload_speed = reload_speed
         self.magazine_size = magazine_size
@@ -561,11 +567,12 @@ class Bullet(Moveable_Object):
             self.update_position()
 
             # draw surface
-            self.draw_surface(position=self.hurtbox.center)
+            # self.draw_surface(position=self.hurtbox.center)
+            self.submit_to_render()
 
             # self.draw_rect(position=self.hurtbox.center)
 
-            self.draw_hitbox()
+            # self.draw_hitbox()
 
             # update movement vars
             self.update_movement()

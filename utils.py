@@ -1,5 +1,5 @@
 import random,string
-import pygame,math
+import pygame,math,sys
 from pygame.math import Vector2
 from .screen import gameScreen
 
@@ -31,6 +31,90 @@ def clamp(n:float, min:float, max:float) -> float:
         return n
     
 
+# give weapon to game object
+def give_weapon(gameobj:object,weaponName:str,weaponClass:classmethod,weaponParams:dict):
+
+    # skip if giving first weapon
+    if gameobj.weapon:
+        
+        # first end weapon state
+        gameobj.weapon.state.completed()
+
+        # find first element in list which is current weapon
+        current_weapon = gameobj.inventory.inventory['weapons'][0]
+        
+    # set weapon to give to player
+    weapon_to_give = weaponName
+
+    # handle inventory 
+    if len(gameobj.inventory.inventory['weapons']) < gameobj.weaponCarryLimit:
+
+        # remove current weapon and add to end of list
+        gameobj.inventory.inventory['weapons'].insert(0,weapon_to_give)
+
+
+    elif len(gameobj.inventory.inventory['weapons']) >= gameobj.weaponCarryLimit:
+
+        # remove current weapon and add to end of list
+        gameobj.inventory.inventory['weapons'].remove(current_weapon)
+        gameobj.inventory.inventory['weapons'].insert(0,weapon_to_give)
+
+    # check if the weapon is not in the cache
+    if weapon_to_give not in gameobj.cachedWeapons:
+        
+        # create weapon obj and init new weapon
+        weapon = weaponClass()
+        set_attributes(game_object=weapon,attributes=weaponParams[weapon_to_give])
+        weapon.init()
+        store_original_vars(game_object=weapon)
+
+        gameobj.weapon = weapon
+        gameobj.weapon.wielded_by = gameobj
+
+        # enter state
+        gameobj.weapon.state = gameobj.weapon.states['PICKUP']
+        gameobj.weapon.state.enter()
+
+        # add weapon to cache
+        gameobj.cachedWeapons[weaponName] = weapon
+
+    # check if the weapon is not in the cache
+    elif weapon_to_give in gameobj.cachedWeapons:
+
+        gameobj.weapon = gameobj.cachedWeapons[weaponName]
+        gameobj.weapon.wielded_by = gameobj
+
+        # enter state
+        gameobj.weapon.state = gameobj.weapon.states['PICKUP']
+        gameobj.weapon.state.enter()
+
+# swap weapon function
+def swap_weapon(gameObject:object):
+
+    if len(gameObject.inventory.inventory['weapons']) > 1:
+
+        # first end weapon state
+        gameObject.weapon.state.completed()
+
+        # find first element in list which is current weapon
+        current_weapon = gameObject.inventory.inventory['weapons'][0]
+        
+        # find second element in list which is next weapon
+        next_weapon = gameObject.inventory.inventory['weapons'][1]
+
+        # remove current weapon and add to end of list
+        gameObject.inventory.inventory['weapons'].pop(0)
+        gameObject.inventory.inventory['weapons'].append(current_weapon)
+
+        # set new weapon
+        gameObject.weapon = gameObject.cachedWeapons[next_weapon]
+        # give_weapon(gameobj=self,weaponName=next_weapon,weaponClass=Gun,weaponParams=gun_parameters)
+        gameObject.weapon.wielded_by = gameObject
+
+        # enter state
+        gameObject.weapon.state = gameObject.weapon.states['PULLOUT']
+        gameObject.weapon.state.enter()
+
 
 # function to find out if an event proced given the percentage chance
 # pro chance is given as a percentage i.e 10% or 50%
@@ -54,6 +138,7 @@ def proc(proc_chance:float):
 
 # given a group of events/items with weights, return an item
 # items with higher weight have a greater chance of being selected
+# dict needs to have key as a string, and v as the weight
 def proc_using_weights(ItemWeights:dict):
 
     # get only the item name and the weight for this specific pool into a dictionary
@@ -62,7 +147,7 @@ def proc_using_weights(ItemWeights:dict):
     # extract all the weights for all items
     for item in ItemWeights:
 
-        DictOfItems[item] = ItemWeights[item]['weight']
+        DictOfItems[item] = ItemWeights[item]
 
     # get the sum of all the weightings
     SumOfWeights = sum(list(DictOfItems.values()))
@@ -544,7 +629,7 @@ def draw_line(startpos:tuple=(0,0),endpos:tuple=(0,0),asset_to_draw=None,asset_t
                                                     'sin_waveX':0,
                                                     'sin_waveX_movement':random.choice(['positive','negative']),
                                                     'scale_factor_timer':1,
-                                                    'alpha_value':255,
+                                                    'alpha_value':1,
                                                     'startpos':startpos,
                                                     'endpos':endpos,
                                                     'schedule_deletion':True}
@@ -572,7 +657,7 @@ def draw_lines(points:tuple=[(0,0),(1,1)],asset_to_draw=None,asset_type:str='lin
                                                     'sin_waveX':0,
                                                     'sin_waveX_movement':random.choice(['positive','negative']),
                                                     'scale_factor_timer':1,
-                                                    'alpha_value':255,
+                                                    'alpha_value':1,
                                                     'points':points,
                                                     'schedule_deletion':True}
 
@@ -588,4 +673,14 @@ def array_is_in_array(array1:list,array2:list):
     # Convert lists to sets and check for intersection
     return set(array2) & set(array1)
 
- 
+# delete states from memory
+def clear_states(statesDict):
+
+    # store keys for states dict
+    states = list(statesDict.keys())
+
+    for state in states:
+        
+        del statesDict[state]
+
+    

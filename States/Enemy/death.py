@@ -33,8 +33,9 @@ class Death(State):
         self.run_timer()
 
         # draw surface
-        self.parent_node.draw_surface(position=self.parent_node.hurtbox.center)
-        self.parent_node.draw_rect(position=self.parent_node.hurtbox.center)
+        self.parent_node.submit_to_render()
+        # self.parent_node.draw_surface(position=self.parent_node.hurtbox.center)
+        # self.parent_node.draw_rect(position=self.parent_node.hurtbox.center)
 
         if self.timer_complete:
             self.emit('IDLE')

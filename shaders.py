@@ -1,94 +1,185 @@
 import pygame
-import moderngl
+import moderngl,os,random,string
 import sys
 from array import array
+from pygame.math import Vector2
+import numpy as np
+import math
+from .animatedsprite import AnimatedSprite
+from .screen import gameScreen
 
-pygame.init()
 
-screen = pygame.display.set_mode((800,600),pygame.OPENGL|pygame.DOUBLEBUF)
-display = pygame.Surface((800,600))
-ctx = moderngl.create_context()
+
+class RenderObject(AnimatedSprite):
+
+    def __init__(self,shader:str='default',swizzle='BGRA'):
+        
+        AnimatedSprite.__init__(self)
+
+        self.shader = shader
+        self.swizzle = swizzle
+        self.texture = None
+        self.pp = None
+
+
+    def init(self):
+
+        # compenents = rgba channels so 4 = all rgba. f1 dtype is 8 bit numbers
+        self.texture = gameScreen.ctx.texture(self.image.get_size(),components=4,dtype='f1')
+     
+        self.texture.filter = (moderngl.NEAREST,moderngl.NEAREST)
+
+        self.texture.swizzle = self.swizzle
+
+        # get rgba/byte information for each pixel in surface
+        self.texture.write(self.image.get_view('1'))
+
+
+    def set_shader(self,shader:str='default'):
+    
+        self.shader = shader
+
+        
+    def surf_to_texture(self):
+
+        
+        # use 0 channel
+        self.texture.use(0)
+
+    def set_uniforms(self,nameVal:dict={}):
+
+        if nameVal:
+
+            for n in nameVal:
+                gameScreen.shaderPrograms[self.shader][n] = nameVal[n]
+
+    def set_default_uniforms(self):
+
+        gameScreen.shaderPrograms[self.shader]['memSlot'] = 0
+        gameScreen.shaderPrograms[self.shader]['alpha'] = 0
+        # self.shaderPrograms[self.shader]['alpha'] = self.alpha
+        gameScreen.shaderPrograms[self.shader]['screenSize'] = (gameScreen.windows[self.surface_to_draw_on].win_width,gameScreen.windows[self.surface_to_draw_on].win_height)
+        gameScreen.shaderPrograms[self.shader]['spriteSize'] = self.image.get_size()
+        gameScreen.shaderPrograms[self.shader]['spriteOffset'] = (self.sprite_offsetx,self.sprite_offsety)
+        gameScreen.shaderPrograms[self.shader]['position'] = self.hurtbox.center
+        gameScreen.shaderPrograms[self.shader]['rotation'] = math.radians(0)
+        gameScreen.shaderPrograms[self.shader]['bgOffset'] = (gameScreen.windows[self.surface_to_draw_on].bg_offset_x,gameScreen.windows[self.surface_to_draw_on].bg_offset_y)
+        gameScreen.shaderPrograms[self.shader]['zoom'] = gameScreen.windows[self.surface_to_draw_on].zoom
+
+        if self.pp:
+            gameScreen.shaderPrograms[self.shader]['zoom'] = 1.1
+        
+
+    def submit_to_render(self,surfaceToDrawOn:str='win'):
+
+        self.surface_to_draw_on = surfaceToDrawOn
+
+        # random_id = ''.join(random.choices(string.ascii_letters + string.digits, k=12))
+
+        gameScreen.windows[self.surface_to_draw_on].drawing_queue[self] = {'assetToDraw':self}
+
+    def render(self):
+
+        print(self.__class__.__name__)
+
+        # run surf to textyre
+        self.surf_to_texture()
+
+        # set default uniforms
+        self.set_default_uniforms()
+
+        # set specifc uniforms
+        self.set_uniforms()
+
+        # render
+        gameScreen.renderObjects[self.shader].render(mode=moderngl.TRIANGLE_STRIP)
+
+        # free up object
+        # self.texture.release()
+
+
+
+
+
+
+# screen = pygame.display.set_mode((800,600),pygame.OPENGL|pygame.DOUBLEBUF|pygame.FULLSCREEN)
+
+# display = pygame.Surface((800,600))
+
+
+
+objs = []
+
+card1 = RenderObject()
+card1.set_shader()
+card1.img_path='pynaccle/Sprites/Cards/Hearts/1_23x36.png'
+card1.load_or_update_image()
+card1.image = card1.image.convert_alpha()
+card1.init()
+card1.hurtbox.center = (0,0)
+
+card2 = RenderObject()
+card2.set_shader()
+card2.img_path='pynaccle/Sprites/Cards/Hearts/1_23x36.png'
+card2.load_or_update_image()
+card2.init()
+card2.image = card2.image.convert_alpha()
+card2.hurtbox.center = (200,0)
+
+card3 = RenderObject()
+card3.set_shader('highlight')
+card3.img_path='pynaccle/Sprites/Cards/Hearts/1_23x36.png'
+card3.load_or_update_image()
+card3.init()
+card3.image = card2.image.convert_alpha()
+card3.hurtbox.center = (50,200)
+
+card4 = RenderObject()
+card4.pp = 1
+card4.set_shader('highlight')
+card4.img_path='pynaccle/Sprites/Cards/Hearts/1_23x36.png'
+card4.load_or_update_image()
+card4.init()
+card4.image = card2.image.convert_alpha()
+card4.hurtbox.center = (50,50)
+
+
+gameScreen.add_window('win',1200,800,1,(0,0))
+
+
+
+
+# add surface ot frame buffer object
+
+
+# ctx = moderngl.create_context()
 
 clock = pygame.time.Clock()
 
-img = pygame.image.load('pynaccle/Sprites/Cards/Hearts/1_23x36.png')
+# img = pygame.image.load('pynaccle/Sprites/Cards/Hearts/1_23x36.png')
 
-img = pygame.transform.scale_by(img,7)
+ccs = [RenderObject() for i in range(1000)]
 
+for bb in ccs:
 
-quad_buffer = ctx.buffer(data=array('f',[
+    bb.set_shader()
+    bb.img_path='pynaccle/Sprites/Cards/Hearts/1_23x36.png'
+    bb.load_or_update_image()
+    bb.init()
+    bb.image = bb.image.convert_alpha()
+    bb.hurtbox.center = (random.randrange(-400,600),random.randrange(-400,400))
 
-    # pos xy uv cords xy
-    -1.0,1.0,0.0,0.0, #tl
-    1.0,1.0,1.0,0.0, # tr
-    -1.0,-1.0,0.0,1.0, # bl
-    1.0,-1.0,1.0,1.0, # br
-]))
-
-
-vert_shader = '''
-#version 330 core
-
-in vec2 vert;
-in vec2 texcoord;
-out vec2 uvs;
-
-void main() {
-    uvs = texcoord;
-    gl_Position = vec4(vert,0.0,1.0);
-
-}
-
-'''
-
-
-
-frag_shader = '''
-#version 330 core
-
-uniform sampler2D tex;
-uniform float time;
-
-in vec2 uvs;
-out vec4 f_color;
-
-void main() {
-    float xxx = time;
-    vec2 sample_pos = vec2(uvs.x* cos(1*time*0.01) ,uvs.y* cos(1*time*0.01));
-    f_color = vec4(texture(tex,sample_pos).r,texture(tex,sample_pos).g ,texture(tex,sample_pos).b,1.0);
-}
-
-'''
-# + sin(uvs.y / 0.07 + time *0.01)*0.1
-
-
-program = ctx.program(vertex_shader=vert_shader,fragment_shader=frag_shader)
-render_object = ctx.vertex_array(program,[(quad_buffer,'2f 2f','vert','texcoord')])
-
-def surf_to_texture(surf):
-
-    tex = ctx.texture(surf.get_size(),4)
-
-    tex.filter = (moderngl.NEAREST,moderngl.NEAREST)
-
-    tex.swizzle = 'BGRA'
-
-    tex.write(surf.get_view('1'))
-
-    return tex
-
-t = 0
 
 while True:
 
-    t += 1
 
-    display.fill((0,0,0))
-    # mysurf.fill((0,0,0))
+
+
+    gameScreen.screen.fill((0,0,0))
     # mysurf.blit(img)
-    display.blit(img,(100,100))
+    # display.blit(img,pygame.mouse.get_pos())
     
-
+    gameScreen.ctx.clear(0.0, 0.0, 0.0)
     for event in pygame.event.get():
 
         if event.type == pygame.QUIT:
@@ -96,17 +187,58 @@ while True:
             pygame.quit()
             sys.exit()
 
-    frame_tex = surf_to_texture(display)
+        if event.type == pygame.KEYDOWN:
 
-    frame_tex.use(0)
+            if event.key == pygame.K_ESCAPE:
+                pygame.quit()
+                sys.exit()
 
-    program['tex'] = 0
-    program['time'] = t
+            if event.key == pygame.K_SPACE:
+                card1.hurtbox.centerx -= 2
+ 
+     
+    # gameScreen.bind_window('win')
+    # card1.render()
+    card2.hurtbox.centerx-= 5
 
-    render_object.render(mode=moderngl.TRIANGLE_STRIP)
+    card4.submit_to_render()
+    card3.submit_to_render()
+    card1.submit_to_render()
+    card2.submit_to_render()
+
+    for bb in ccs:
+
+        m = 1
+        
+        if m == 1:
+            bb.hurtbox.centerx += 1
+            # bb.hurtbox.centerx += random.randrange(-4,5)
+            # bb.hurtbox.centery -= random.randrange(-3,3)
+
+        if m == 2:
+            bb.hurtbox.centerx -= 2
+            bb.hurtbox.centery += 1
+
+        bb.submit_to_render()
+
+    # card2.render()
+    gameScreen.render_windows()
+
+
 
     pygame.display.flip()
 
-    frame_tex.release()
+    
     
     clock.tick(60)
+
+
+    import numpy as np
+
+# def create_noise_texture(ctx, width, height):
+#     # random noise, values 0-255
+#     noise = np.random.randint(0, 255, (height, width), dtype=np.uint8)
+    
+#     texture = ctx.texture((width, height), 1, noise.tobytes())  # 1 = single channel (red)
+#     texture.filter = (moderngl.NEAREST, moderngl.NEAREST)
+#     return texture
