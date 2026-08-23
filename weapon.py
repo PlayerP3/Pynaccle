@@ -18,7 +18,9 @@ class Weapon():
                 
                 casted_rays:int=2,raycast_depth:int=1,raycast_width:int=1,raycast_angle_offset:int=0,
                 
-                shot_spread_pattern:str='perfect',shot_spread_number:int=0,is_dual_wield:bool=False,dualWieldCopy:str='same',img_path:str=''):
+                shot_spread_pattern:str='perfect',shot_spread_number:int=0,is_dual_wield:bool=False,dualWieldCopy:str='same',img_path:str='',
+
+                inWeaponBox:bool = True):
 
         self.name = name
         self.weight = weight
@@ -69,6 +71,9 @@ class Weapon():
         self.raycast_depth = raycast_depth
         self.raycast_width = raycast_width
         self.raycast_angle_offset = raycast_angle_offset
+
+        # whether it appear in weapon box or not
+        self.inWeaponBox = inWeaponBox
 
         # store attributes for different projectiles
         self.projectile_attributes = {}

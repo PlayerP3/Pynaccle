@@ -30,7 +30,6 @@ def clamp(n:float, min:float, max:float) -> float:
     else:
         return n
     
-
 # give weapon to game object
 def give_weapon(gameobj:object,weaponName:str,weaponClass:classmethod,weaponParams:dict):
 
@@ -115,6 +114,15 @@ def swap_weapon(gameObject:object):
         gameObject.weapon.state = gameObject.weapon.states['PULLOUT']
         gameObject.weapon.state.enter()
 
+# remove weapon function
+def remove_weapon(gameObject:object):
+
+    # swap weapon
+    swap_weapon(gameObject=gameObject)
+
+    # now remove weapon in second slot
+    secondSlotWeapon = gameObject.inventory.inventory['weapons'][1]
+    gameObject.inventory.inventory['weapons'].remove(secondSlotWeapon)
 
 # function to find out if an event proced given the percentage chance
 # pro chance is given as a percentage i.e 10% or 50%

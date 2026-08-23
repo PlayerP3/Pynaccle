@@ -31,6 +31,16 @@ class Cycling(State):
         self.reset_timer()
         self.start_timer()
 
+        self.parent_node.cycleTimer.reset_timer()
+        self.parent_node.cycleTimer.start_timer()
+        self.parent_node.cycleTimer.elapsed_time = self.parent_node.cycleTimer.timer_limit #allos us to choose new sprite
+
+        # get cycle options
+        self.parent_node.predetermine_cycle_options()
+
+        # set display item posiion
+        self.parent_node.displayItem.hurtbox.center = self.parent_node.hurtbox.center
+
     def update(self):
 
         # run timer
@@ -41,6 +51,9 @@ class Cycling(State):
 
         # run move and collide, end condition is in here
         self.parent_node.move_and_collide()  
+
+        # display cycle options
+        self.parent_node.cycle_through_options()
 
         # draw surface
         self.parent_node.submit_to_render()

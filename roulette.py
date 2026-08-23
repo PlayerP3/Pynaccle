@@ -15,7 +15,9 @@ from .animatedsprite import AnimatedSprite
 
 class Roulette(Interactable):
 
-    def __init__(self,options:list=[],idleInteractTimerLimit:float=0.4,displayInteractTimerLimit:float=0.4):
+    def __init__(self,options:dict={},idleInteractTimerLimit:float=0.4,displayInteractTimerLimit:float=0.4,nextOptionCycleTimeLimit:float=0.5,cycleSpeed:float=1.5,
+
+                 randomSampleCount:float=5):
 
         
         # get options  i.e what it cycles through
@@ -33,11 +35,19 @@ class Roulette(Interactable):
         self.displayItem = AnimatedSprite()
         self.finalDisplay = None
 
+        # cycling variables
+        # time limit for cycling to the next option
+        self.nextOptionCycleTimeLimit = nextOptionCycleTimeLimit
+        self.cycleSpeed = cycleSpeed
+        self.cycleTimer = Timer(timer_speed=self.cycleSpeed,timer_limit=nextOptionCycleTimeLimit,timer_replay=True)
+        self.cycleList = []
+
         Interactable.__init__(self)
         
         self.displayItem.zlayer_drawing = self.zlayer_drawing + 1
         
-
+        # how many replicates of each cycle option to make for rando smapling
+        self.randomSampleCount = randomSampleCount 
 
     def init(self):
 
@@ -52,7 +62,7 @@ class Roulette(Interactable):
                        }
         
         # set new vars for certain states
-        self.states['CYCLING'].timer_limit = 12
+        self.states['CYCLING'].timer_limit = 4
         self.states['DISPLAY'].timer_limit = 8
         
         # set animation player to not replay
@@ -151,17 +161,52 @@ class Roulette(Interactable):
         self.update_position()
 
 
-    # function to get the images we cycle through
     def filter_cycle_options(self):
-
+    
         pass
+
+    def predetermine_cycle_options(self):
+
+        # filter options, i.e removing wonder weapons etc
+        self.filter_cycle_options()
+
+        # reset cycle list
+        self.cycleList = []
+
+        # now based on length of cycle timer and speed find how many frames/sprites we need, + 1 because we start the cycle loop by skipping the first cycle
+        totalFrames = int(self.states['CYCLING'].timer_limit//(self.nextOptionCycleTimeLimit/self.cycleSpeed)) + 1
+
+        # get list of items to cycle through, for counts we are basically keeping 3 of each weapon 
+        self.cycleList = random.sample(population=list(self.filteredOptions.keys()),k=totalFrames,counts=[self.randomSampleCount for x in range(0,len(list(self.filteredOptions.keys())))])
+
+    # function to get the images we cycle through
+    def cycle_through_options(self):
+
+        # run cycle timer
+        self.cycleTimer.run_timer()
+
+        # if timer complete
+        if self.cycleTimer.timer_complete:
+
+            # change display item
+            self.displayItem.img_path = self.filteredOptions[self.cycleList[0]]['img_path']
+
+            # remove first item in cycle list
+            self.cycleList = self.cycleList[1:]
+
+        # display item
+        self.displayItem.submit_to_render()
+
+    # function to pick a final display
+    def predetermine_final_display(self):
+
+        # pick item to give, need to pass dict of item name and its weight only
+        self.finalDisplay = proc_using_weights({k:v['weight'] for k,v in self.filteredOptions.items()})
 
     # function to control how the display item acts during cycling
     def update_display_item(self):
 
         pass
-
-    
 
     # pick the final result based on the options
     def choose_final_display(self):

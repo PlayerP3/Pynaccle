@@ -31,6 +31,10 @@ class Display(State):
         self.reset_timer()
         self.start_timer()
 
+        # find final display
+        self.parent_node.predetermine_final_display()
+
+
     def update(self):
 
         # run timer
@@ -47,13 +51,19 @@ class Display(State):
         # self.parent_node.draw_surface(position=self.parent_node.spawnLocation)
         # self.parent_node.draw_rect(position=self.parent_node.spawnLocation)
 
-        if self.parent_node.interactTimer.timer_complete or self.timer_complete:
+        # display item
+        self.parent_node.displayItem.submit_to_render()
+
+        if self.parent_node.interactTimer.timer_complete:
             
-            # self.parent_node.pay()
+            self.parent_node.pay()
             
             self.emit('RESET')
 
-        
+        elif self.timer_complete:
+
+            self.emit('RESET')
+            
     def collision_check(self,axis:str='y'):
 
         # if nothinbg is interacting
@@ -86,7 +96,7 @@ class Display(State):
                 self.parent_node.interactingObj = None
 
                 # reset timer
-                self.parent_node.interactTImer.reset_timer()
+                self.parent_node.interactTimer.reset_timer()
 
 
     # handle collision once the check is confirmed
