@@ -27,6 +27,15 @@ class Display(State):
         self.parent_node.animationPlayer.reset_timer()
         # self.parent_node.animationPlayer.start_timer(startTime=1)
 
+        self.parent_node.display_message.update_message(f"Hold E to interact")
+
+        # fix zoom
+        self.parent_node.displayItem.zoom = self.parent_node.maxDisplayItemZoom
+
+        # reset lerp timer
+        self.parent_node.displayItem.lerpTimer.reset_timer()
+        
+
         # reset timer
         self.reset_timer()
         self.start_timer()
@@ -54,15 +63,24 @@ class Display(State):
         # display item
         self.parent_node.displayItem.submit_to_render()
 
-        if self.parent_node.interactTimer.timer_complete:
-            
-            self.parent_node.pay()
-            
-            self.emit('RESET')
+        # lerp sprite size back to normal
+        # lerp sprite size
+        self.parent_node.displayItem.lerpTimer.start_timer()
+        self.parent_node.displayItem.lerpTimer.run_timer()
+        self.parent_node.displayItem.zoom = linear_lerp(self.parent_node.maxDisplayItemZoom,self.parent_node.minDisplayItemZoom,self.parent_node.displayItem.lerpTimer.elapsed_time)
 
-        elif self.timer_complete:
+        # end condition
+        self.end_condition()
 
-            self.emit('RESET')
+        # if self.parent_node.interactTimer.timer_complete:
+            
+        #     self.parent_node.pay()
+            
+        #     self.emit('RESET')
+
+        # elif self.timer_complete:
+
+        #     self.emit('RESET')
             
     def collision_check(self,axis:str='y'):
 
@@ -77,6 +95,8 @@ class Display(State):
                 self.parent_node.interactingObj = self.parent_node.purchasingObj
 
                 self.handle_collision(game_object=objectManager.player,axis=axis)
+
+
                 
 
         # if something is interacting already
@@ -97,6 +117,8 @@ class Display(State):
 
                 # reset timer
                 self.parent_node.interactTimer.reset_timer()
+
+       
 
 
     # handle collision once the check is confirmed
@@ -119,22 +141,25 @@ class Display(State):
 
             self.parent_node.interactTimer.reset_timer()
 
-
+        # draw display message if colliding             
+        self.parent_node.display_message.submit_to_render()
      # end condition
     def end_condition(self):
-
-        # dont pay up but move to reset
-        if self.timer_complete:
-
-            self.parent_node.finalDisply = None
 
         # pay up
         if self.parent_node.interactTimer.timer_complete:
 
             # pay up
-            self.parent_node.pay(self.purchasingObj)
+            self.parent_node.pay()
 
             # remove final display
             self.parent_node.finalDisplay = None
+
+            self.emit('RESET')
+
+        # dont pay up but move to reset
+        elif self.timer_complete:
+
+            self.parent_node.finalDisply = None
 
             self.emit('RESET')

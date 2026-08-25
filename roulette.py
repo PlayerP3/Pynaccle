@@ -17,7 +17,7 @@ class Roulette(Interactable):
 
     def __init__(self,options:dict={},idleInteractTimerLimit:float=0.4,displayInteractTimerLimit:float=0.4,nextOptionCycleTimeLimit:float=0.5,cycleSpeed:float=1.5,
 
-                 randomSampleCount:float=5):
+                 randomSampleCount:float=5, maxDisplayItemZoom:float=1.5, minDisplayItemZoom:float=0.5, displayItemZoomChangeSpeed:float=0.1):
 
         
         # get options  i.e what it cycles through
@@ -34,6 +34,12 @@ class Roulette(Interactable):
         # get item display object
         self.displayItem = AnimatedSprite()
         self.finalDisplay = None
+
+        # vars for max and min display sprite zoom
+        self.maxDisplayItemZoom = maxDisplayItemZoom
+        self.minDisplayItemZoom = minDisplayItemZoom
+        self.displayItem.zoom = self.minDisplayItemZoom
+        self.displayItem.lerpTimer.timer_speed = displayItemZoomChangeSpeed
 
         # cycling variables
         # time limit for cycling to the next option
@@ -196,6 +202,11 @@ class Roulette(Interactable):
 
         # display item
         self.displayItem.submit_to_render()
+
+        # lerp sprite size
+        self.displayItem.lerpTimer.start_timer()
+        self.displayItem.lerpTimer.run_timer()
+        self.displayItem.zoom = linear_lerp(self.minDisplayItemZoom,self.maxDisplayItemZoom,self.displayItem.lerpTimer.elapsed_time)
 
     # function to pick a final display
     def predetermine_final_display(self):

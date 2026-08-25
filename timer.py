@@ -49,7 +49,7 @@ class Timer():
 
         if self.elapsed_time == 0:
             self.timer_init(startTime)
-        
+
     def pause_timer(self):
         self.paused_time = self.start_time
 
@@ -57,7 +57,7 @@ class Timer():
         self.elapsed_time += self.paused_time
 
     def run_timer(self):
-
+        
         # if timer isnt complete
         if self.timer_running:
 

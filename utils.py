@@ -87,6 +87,9 @@ def give_weapon(gameobj:object,weaponName:str,weaponClass:classmethod,weaponPara
         gameobj.weapon.state = gameobj.weapon.states['PICKUP']
         gameobj.weapon.state.enter()
 
+    # add weapon to roulette pool if it has been picked before
+    weaponParams[weaponName]['inWeaponBox'] = True
+
 # swap weapon function
 def swap_weapon(gameObject:object):
 
@@ -192,7 +195,7 @@ def proc_using_weights(ItemWeights:dict):
 
 # linear interpolation value
 # t is the fraction of time that has elapsed, start is the start value, end is the end value we want to reach
-def linear_lerp(start:float,end:float,t:float=1/60):
+def linear_lerp(start:float,end:float,t:float):
 
     # limit t
     t = min(1,t)

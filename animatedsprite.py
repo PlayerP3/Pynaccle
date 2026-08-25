@@ -140,6 +140,9 @@ class AnimatedSprite():
 
         self.flip_range = flip_range
 
+        # lerp timer for anything with a sprite
+        self.lerpTimer = Timer(timer_limit=1)
+
         # controls whetehr an object is dran on a center, or topleft
         self.vertice = vertice
 

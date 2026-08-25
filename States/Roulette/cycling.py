@@ -41,6 +41,12 @@ class Cycling(State):
         # set display item posiion
         self.parent_node.displayItem.hurtbox.center = self.parent_node.hurtbox.center
 
+        # set sprite size as min
+        self.parent_node.displayItem.zoom = self.parent_node.minDisplayItemZoom
+
+        # reset lerp timer
+        self.parent_node.displayItem.lerpTimer.reset_timer()
+        
     def update(self):
 
         # run timer

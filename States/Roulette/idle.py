@@ -23,7 +23,8 @@ class Idle(State):
         self.parent_node.animationPlayer.timer_speed = 0
         self.parent_node.animationPlayer.currentFrameNumber = 0
         self.parent_node.animationPlayer.reset_timer()
-        
+
+        self.parent_node.display_message.update_message(f"E")
 
     def update(self):
 
