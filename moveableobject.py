@@ -859,8 +859,16 @@ class Moveable_Object(AnimatedSprite):
         different_origin_surrounding_objets = [x for x in self.surrounding_game_objects if x.object_of_origin != self.object_of_origin]  
 
         
-        # print(objectManager.object_positions[(-224.0, -160.0)])
-        # sys.exit()
+        # filter interactables only and find closest one
+        closestInteractable = None
+        interactables = [x for x in self.surrounding_game_objects if array_is_in_array(get_mro(gameObject=x),['Interactable'])]
+
+        if interactables:
+            closestInteractable = min(interactables,key=lambda x:find_dist_between_points(x.hurtbox.center,self.hurtbox.center))
+            closestInteractable.interactingObj = self
+           
+    
+    
         # go through all possible game objects
         for game_object in self.surrounding_game_objects:
 

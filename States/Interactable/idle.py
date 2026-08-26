@@ -41,47 +41,51 @@ class Idle(State):
     # wall collision check
     def collision_check(self,axis:str='y'):
 
-        # if we dont have an interacting object
-        if not self.parent_node.interactingObj:
+        # # if we dont have an interacting object
+        # if not self.parent_node.interactingObj:
 
-            # find surrounding objects
-            self.parent_node.find_surrounding_game_objects()
+        #     # find surrounding objects
+        #     self.parent_node.find_surrounding_game_objects()
 
-            # filter surrounding objects
-            self.parent_node.filter_surrounding_game_objects(['Player'])
+        #     # filter surrounding objects
+        #     self.parent_node.filter_surrounding_game_objects(['Player'])
 
-            # go through all possible game objects
-            for game_object in self.parent_node.surrounding_game_objects: 
+        #     # go through all possible game objects
+        #     for game_object in self.parent_node.surrounding_game_objects: 
 
-                # check for self collision with object
-                collision,hitbox = self.parent_node.hitbox_collision(game_object=game_object)
+        #         # check for self collision with object
+        #         collision,hitbox = self.parent_node.hitbox_collision(game_object=game_object)
 
-                # if there is a collision
-                if collision:
+        #         # if there is a collision
+        #         if collision:
 
-                    if game_object.is_interacting:
+        #             if game_object.is_interacting:
                     
-                        self.handle_collision(game_object=game_object,axis=axis)
+        #                 self.handle_collision(game_object=game_object,axis=axis)
 
-                        # set interacting obj
-                        self.parent_node.interactingObj = game_object
+        #                 # set interacting obj
+        #                 self.parent_node.interactingObj = game_object
  
-                    elif not game_object.is_interacting:
+        #             elif not game_object.is_interacting:
                         
-                        self.handle_collision(game_object=game_object,axis=axis)
+        #                 self.handle_collision(game_object=game_object,axis=axis)
 
 
         # if we have an interacting object
-        elif self.parent_node.interactingObj:
+        if self.parent_node.interactingObj:
 
             # look fror collision
             collision,hitbox = self.parent_node.hitbox_collision(game_object=self.parent_node.interactingObj)
 
             # the interacting obj stopped interacting
             if not self.parent_node.interactingObj.is_interacting:
+
+                if collision:
+                    self.handle_collision(game_object=self.parent_node.interactingObj,axis=axis)
                     
                 self.parent_node.clear_interactingObj()
-                
+
+        
             # the interacting obj is still interactring
             elif self.parent_node.interactingObj.is_interacting:
 
@@ -112,3 +116,5 @@ class Idle(State):
         if self.parent_node.interactTimer.timer_complete:
 
             self.parent_node.pay(gameobj=self.parent_node.interactingObj)
+
+            self.parent_node.interactingObj.is_interacting = False

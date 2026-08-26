@@ -100,6 +100,8 @@ class Interactable(StateMachine,Moveable_Object):
             # run effect depending on interactable
             self.run_effect(gameobj=gameobj)
 
+            
+
 
     # what happens when object is within interacting rnage but not colliding with the actual object
     def handle_interaction(self,gameobj:object):
