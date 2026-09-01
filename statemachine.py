@@ -33,7 +33,6 @@ class StateMachine():
         self.state = new_state
         self.state.enter()
 
-
     def update(self):
 
         self.state.update()
@@ -44,6 +43,8 @@ class StateMachine():
     def unhandled_events(self,event):
 
         self.state.handle_event(event)
+
+    
    
 class State(Timer):
 
@@ -93,6 +94,10 @@ class State(Timer):
     def end_condition(self):
 
         pass
+
+    @property
+    def name(self):
+        return self.__class__.__name__
 
 
 # # set Dict of all states

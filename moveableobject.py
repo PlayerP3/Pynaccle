@@ -78,6 +78,9 @@ class Moveable_Object(AnimatedSprite):
         self.invincibility_duration = invincibility_duration
         self.invincibility_timer = invincibility_duration
 
+        # interacting vat
+        self.is_interacting = False
+
         # ricochet variable
         self.can_ricochet = can_ricochet
 
@@ -842,7 +845,17 @@ class Moveable_Object(AnimatedSprite):
         self.direction_vectorY = 0
         self.collision_vector = Vector2(0,0)
 
-    
+    # find closest interactable to the moveable object
+    def find_closest_interactable(self):
+
+        # get all nearby interavtables
+        interactables = [x for x in self.surrounding_game_objects if array_is_in_array(get_mro(gameObject=x),['Interactable'])]
+
+        # if interactables find the closest one
+        if interactables:
+            closestInteractable = min(interactables,key=lambda x:find_dist_between_points(x.hurtbox.center,self.hurtbox.center))
+            closestInteractable.interactingObj = self
+
 
     # wall collision check
     def collision_check(self,axis:str='y'):
@@ -858,17 +871,9 @@ class Moveable_Object(AnimatedSprite):
         self_origin_surrounding_objects  = [x for x in self.surrounding_game_objects if x.object_of_origin == self.object_of_origin]  
         different_origin_surrounding_objets = [x for x in self.surrounding_game_objects if x.object_of_origin != self.object_of_origin]  
 
-        
-        # filter interactables only and find closest one
-        closestInteractable = None
-        interactables = [x for x in self.surrounding_game_objects if array_is_in_array(get_mro(gameObject=x),['Interactable'])]
-
-        if interactables:
-            closestInteractable = min(interactables,key=lambda x:find_dist_between_points(x.hurtbox.center,self.hurtbox.center))
-            closestInteractable.interactingObj = self
+        # identify closest interactable to object
+        self.find_closest_interactable()
            
-    
-    
         # go through all possible game objects
         for game_object in self.surrounding_game_objects:
 
