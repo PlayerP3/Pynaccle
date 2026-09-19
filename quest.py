@@ -10,8 +10,9 @@ from .States.Task.idle import Idle
 from .States.Task.active import Active
 from .States.Task.completed import Completed
 
-class Task(StateMachine,Enum):
 
+class Tasks(Enum):
+    
     PLACEHOLDER = 'placeholder'
     FILLSOULBOX = 'fillSoulBox'
     PICKUPWEAPON = 'pickUpWeapon'
@@ -20,7 +21,10 @@ class Task(StateMachine,Enum):
     INTERACTWITHITEM = 'interactWithItem'
     
 
-    def __init__(self,parentNodes:list=[],linkedNodes:list=[],targetValue=1,taskType:str='s',description:str='Complete this task.'):
+
+class Task(StateMachine):
+
+    def __init__(self,parentNodes:list=[],linkedNodes:list=[],targetValue=1,taskType:str='placeholder',description:str='Complete this task.'):
 
         self.description = description
         self.parentNodes = parentNodes
@@ -47,21 +51,7 @@ class Task(StateMachine,Enum):
 
 
     def update(self):
-
-        if self.taskType == 'fill souls':
-
-            
-            pass
         pass
-
-    # @property
-    # def is_complete(self):
-
-    #     if self.taskType is Task.FILLSOULBOX:
-    #         pass
-
-    #     return False
-    #     pass
 
     def display_progress(self):
         pass
@@ -79,38 +69,73 @@ class Task(StateMachine,Enum):
 
         if self.currentValue >= self.targetValue:
             self.done = True
+            
+    # set parent nodes
+    def add_parent_nodes(self,nodes):
+        
+        if isinstance(nodes,list):
+            self.parentNodes.extend(nodes)
+            
+        else:
+            self.parentNodes.append(nodes)
+            
+    # set linked nodes
+    def add_linked_nodes(self,nodes):
+        
+        if isinstance(nodes,list):
+            self.linkedNodes.extend(nodes)
+            
+        else:
+            self.linkedNodes.append(nodes)
 
-
-
+    # set target value
+    def set_target_value(self,value:float):
+        
+        self.targetValue = value
+        
+    # set description
+    def set_description(self,value:str):
+        
+        self.description = value
 
 
 
 class Quest():
 
-    def __init__(self,parentNodes,prerequisites,rewards,tasks:dict={},description:str='Build Upgraded Weapon'):
+    def __init__(self,parentNodes=[],prerequisites=[],rewards=[],tasks:dict={},followOrder:bool=False,description:str='Description goes here.'):
 
         self.parentNodes = parentNodes
         self.tasks = tasks
         self.description = description
         self.prerequisites = prerequisites
         self.rewards = rewards
+        self.followOrder = followOrder
         self.displayIcon = AnimatedSprite()
         self.currentTask = 0
+        
 
-    def add_task(self,taskPosition:int,task:Task):
+    def add_task(self,taskPosition:int,task:Tasks):
 
         self.tasks[taskPosition] = task
-        pass
+       
 
-    def remove_task(self):
-        pass
+    def remove_task(self,taskPosition:int):
+        
+        del self.tasks[taskPosition]
+        
 
-    def update_task(self):
-
-        pass
+    def update_tasks(self):
+        
+        # if we are following an order than we just run the current one
+        if self.followOrder:
+            self.tasks[self.currentTask].update()
+    
+    # set description
+    def set_description(self,value:str):
+        
+        self.description = value
 
     @property
     def get_current_task(self):
         pass
-
 

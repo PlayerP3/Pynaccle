@@ -9,6 +9,7 @@ from .pens import penHolder
 from .tilemap import tilemapProcessor
 from .hud import overlay
 from .inventory import gameInventory
+from .configs import configData
 # from .shaders import context
 
 
@@ -52,6 +53,7 @@ class Engine(GameStateMachine):
         self.tilemapProcessor = tilemapProcessor
         self.overlay = overlay
         self.inventory = gameInventory
+        self.configData = configData 
 
         # create vars
         self.tileSize = None
@@ -63,7 +65,7 @@ class Engine(GameStateMachine):
 
     # def init(self,states:dict={},beginningState:str='START',tilemapPath:str='',classMappings:dict={},player:object=None,tileSize:int=32):
     def init(self,states:dict={},beginningState:str='SPLASH',tilemapJSONDir:str='tilemaps',classMappings:dict={},
-             windows:str='configs/config_window.json',hitboxMetadataJSON:str=''):
+             windows:str='configs/config_window.json',hitboxMetadataJSON:str='',configs:list=[]):
 
         # set path to game
         # self.gamePath = gamePath
@@ -80,6 +82,13 @@ class Engine(GameStateMachine):
     
         # set first state and enter
         self.state = self.states[beginningState]
+        
+        # store configs
+        if configs:
+            for f in configs:
+    
+                # add the config to the object
+                self.configData.add_config(f)
 
         # add windows to screen
         with open(windows,'r') as winConfig:
@@ -103,10 +112,13 @@ class Engine(GameStateMachine):
                 boxMetadata = json.load(hitboxMetadataFile)
 
             hitboxSystem.metaData = boxMetadata
+            
+        # load config files
+        
 
 
     
-
+    
     
 
     def run(self):

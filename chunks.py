@@ -71,7 +71,6 @@ class Chunk(AnimatedSprite):
     def set_default_uniforms(self):
 
         gameScreen.shaderPrograms[self.shader]['memSlot'] = 0
-        gameScreen.shaderPrograms[self.shader]['alpha'] = 1
         # self.shaderPrograms[self.shader]['alpha'] = self.alpha
         gameScreen.shaderPrograms[self.shader]['screenSize'] = (gameScreen.windows[self.surface_to_draw_on].win_width,gameScreen.windows[self.surface_to_draw_on].win_height)
         # gameScreen.shaderPrograms[self.shader]['screenSize'] = (gameScreen.fullscreen_width,gameScreen.fullscreen_height)

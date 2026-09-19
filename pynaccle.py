@@ -47,6 +47,9 @@ class Pynaccle(GameStateMachine):
         self.penHolder = penHolder
         self.tilemapProcessor = tilemapProcessor
         self.overlay = overlay
+        
+        # loaded configs stored here
+        self.loadedConfigs = {}
 
         # create vars
         self.tileSize = None
@@ -66,15 +69,13 @@ class Pynaccle(GameStateMachine):
 
         self.tilemapProcessor.load_tilemap(tileampJSON=tilemapJSON,classMappings=classMappings)
 
-
-
-
-
     def run(self):
 
         if self.playing:
             self.update()
-        
+
+
+      
         
 
 

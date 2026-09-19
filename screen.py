@@ -62,9 +62,12 @@ class ContextManager():
                 myShader = ffile.read()
 
                 self.fragmentShaders[shaderName] = myShader
+                
+                
 
         for shader in self.vertexShaders:
-            self.shaderPrograms[shader] = self.ctx.program(vertex_shader=self.vertexShaders[shader],fragment_shader=self.fragmentShaders[shader])
+            
+            self.shaderPrograms[shader] = self.ctx.program(vertex_shader=self.vertexShaders[shader],fragment_shader=self.fragmentShaders[shader])           
             self.renderObjects[shader] = self.ctx.vertex_array(self.shaderPrograms[shader],[(self.quadBuffer,'2f 2f','vertexPosition','textureCoordinate')])
  
 
@@ -74,7 +77,7 @@ class Screen(ContextManager):
     def __init__(self):
 
         # the final display which the window is drawn onto
-        self.screen = pygame.display.set_mode((0,0),pygame.OPENGL|pygame.DOUBLEBUF|pygame.FULLSCREEN)
+        self.screen = pygame.display.set_mode((0,0),pygame.OPENGL|pygame.DOUBLEBUF|pygame.FULLSCREEN,vsync=1)
 
         ContextManager.__init__(self)
 
@@ -620,17 +623,9 @@ class Window():
                 gameScreen.shaderPrograms[self.shader][n] = nameVal[n]
 
     def set_default_uniforms(self):
-
+        
         gameScreen.shaderPrograms[self.shader]['memSlot'] = 0
-        # gameScreen.shaderPrograms[self.shader]['alpha'] = self.alpha
-        gameScreen.shaderPrograms[self.shader]['screenSize'] = (gameScreen.fullscreen_width,gameScreen.fullscreen_height)
-        gameScreen.shaderPrograms[self.shader]['spriteSize'] = self.win.get_size()
-        gameScreen.shaderPrograms[self.shader]['spriteOffset'] = (0,0)
-        # gameScreen.shaderPrograms[self.shader]['position'] = (0,0)
-        gameScreen.shaderPrograms[self.shader]['position'] = self.pos
-        gameScreen.shaderPrograms[self.shader]['rotation'] = math.radians(0.0)
-        gameScreen.shaderPrograms[self.shader]['bgOffset'] = (0,0)
-        gameScreen.shaderPrograms[self.shader]['zoom'] = self.zoom
+       
 
     def render(self):
 

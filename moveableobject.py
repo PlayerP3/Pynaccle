@@ -48,6 +48,8 @@ class Moveable_Object(AnimatedSprite):
                  ranged_dot_effects:dict={},inaccessible:bool=True):
 
         
+        # store quests
+        self.quests = []
 
         # store base stats in a dict
         self.base_stats = {'x_metres_before_collision_detection':x_metres_before_collision_detection,

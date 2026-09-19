@@ -136,3 +136,18 @@ class FillSoul(Task):
   
 
 print(FillSoul.SOULCAP.is_complete)
+
+
+
+class Tasks(Enum):
+    
+    PLACEHOLDER = 'placeholder'
+    FILLSOULBOX = 'fillSoulBox'
+    PICKUPWEAPON = 'pickUpWeapon'
+    PLACEWEAPON = 'placeWeapon'
+    GOTOLOCATION = 'goToLocation'
+    INTERACTWITHITEM = 'interactWithItem'
+    
+
+x = Tasks('placeholder')
+
