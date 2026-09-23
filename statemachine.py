@@ -43,6 +43,11 @@ class StateMachine():
     def unhandled_events(self,event):
 
         self.state.handle_event(event)
+        
+    @property
+    def currentState(self):
+        
+        return [k for k,v in self.states.items() if v == self.state][0]
 
     
    

@@ -51,6 +51,10 @@ class Moveable_Object(AnimatedSprite):
         # store quests
         self.quests = []
 
+        # store tasks
+        self.tasks = []
+        
+        
         # store base stats in a dict
         self.base_stats = {'x_metres_before_collision_detection':x_metres_before_collision_detection,
                            'x_metres_before_homing_detection':x_metres_before_homing_detection,

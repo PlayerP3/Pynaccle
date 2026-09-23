@@ -13,6 +13,7 @@ class Interactable(StateMachine,Moveable_Object):
     def __init__(self,cost:float=0):
 
         Moveable_Object.__init__(self)
+        
 
         # things an interactable needs:
         # a separate rect to handle its interaction window

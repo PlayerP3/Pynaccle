@@ -17,12 +17,5 @@ class Idle(State):
 
     def update(self):
 
-        pass
-
         # run end contiion
         self.end_condition()
-
-    # end condition
-    def end_condition(self):
-        
-        self.parent_node.activate()

@@ -10,6 +10,7 @@ from .tilemap import tilemapProcessor
 from .hud import overlay
 from .inventory import gameInventory
 from .configs import configData
+from .quest import questManager
 # from .shaders import context
 
 
@@ -54,6 +55,7 @@ class Engine(GameStateMachine):
         self.overlay = overlay
         self.inventory = gameInventory
         self.configData = configData 
+        self.questManager = questManager
 
         # create vars
         self.tileSize = None
@@ -112,14 +114,6 @@ class Engine(GameStateMachine):
                 boxMetadata = json.load(hitboxMetadataFile)
 
             hitboxSystem.metaData = boxMetadata
-            
-        # load config files
-        
-
-
-    
-    
-    
 
     def run(self):
 

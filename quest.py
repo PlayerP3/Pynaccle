@@ -6,103 +6,15 @@ from .utils import *
 from enum import Enum,auto
 from .animatedsprite import AnimatedSprite
 from .statemachine import StateMachine
-from .States.Task.idle import Idle
-from .States.Task.active import Active
-from .States.Task.completed import Completed
+from .States.Quest.idle import Idle
+from .States.Quest.active import Active
+from .States.Quest.completed import Completed
+from .task import Task
 
 
-class Tasks(Enum):
-    
-    PLACEHOLDER = 'placeholder'
-    FILLSOULBOX = 'fillSoulBox'
-    PICKUPWEAPON = 'pickUpWeapon'
-    PLACEWEAPON = 'placeWeapon'
-    GOTOLOCATION = 'goToLocation'
-    INTERACTWITHITEM = 'interactWithItem'
-    
+class Quest(StateMachine):
 
-
-class Task(StateMachine):
-
-    def __init__(self,parentNodes:list=[],linkedNodes:list=[],targetValue=1,taskType:str='placeholder',description:str='Complete this task.'):
-
-        self.description = description
-        self.parentNodes = parentNodes
-        self.linkedNodes = linkedNodes
-        self.taskType = taskType
-        self.targetValue = targetValue
-        self.currentValue = 0
-        self.displayIcon = AnimatedSprite()
-
-    def init(self):
-
-        # init state machine
-        self.states = {'IDLE':Idle(),
-                       'ACTIVE':Active(),
-                       'COMPLETED':Completed()}
-
-        # set parent node for player states
-        for x in self.states:
-            self.states[x].parent_node = self
-            self.states[x].timer_limit = self.stateTimeLimit[x]
-        
-        # pick state to start in
-        self.state = self.states['IDLE']
-
-
-    def update(self):
-        pass
-
-    def display_progress(self):
-        pass
-
-    # @property
-    # def description(self):
-
-    #     if self.taskType is Task.FILLSOULBOX:
-    #         return  'Fill '
-
-    def activate(self):
-        pass
-
-    def end_condition(self):
-
-        if self.currentValue >= self.targetValue:
-            self.done = True
-            
-    # set parent nodes
-    def add_parent_nodes(self,nodes):
-        
-        if isinstance(nodes,list):
-            self.parentNodes.extend(nodes)
-            
-        else:
-            self.parentNodes.append(nodes)
-            
-    # set linked nodes
-    def add_linked_nodes(self,nodes):
-        
-        if isinstance(nodes,list):
-            self.linkedNodes.extend(nodes)
-            
-        else:
-            self.linkedNodes.append(nodes)
-
-    # set target value
-    def set_target_value(self,value:float):
-        
-        self.targetValue = value
-        
-    # set description
-    def set_description(self,value:str):
-        
-        self.description = value
-
-
-
-class Quest():
-
-    def __init__(self,parentNodes=[],prerequisites=[],rewards=[],tasks:dict={},followOrder:bool=False,description:str='Description goes here.'):
+    def __init__(self,parentNodes=[],prerequisites=[],rewards=[],tasks:dict={},followOrder:bool=True,description:str='Description goes here.'):
 
         self.parentNodes = parentNodes
         self.tasks = tasks
@@ -113,29 +25,139 @@ class Quest():
         self.displayIcon = AnimatedSprite()
         self.currentTask = 0
         
+        super().__init__()
+        
+    def init(self):
+    
+        # init state machine
+        self.states = {'IDLE':Idle(),
+                        'ACTIVE':Active(),
+                        'COMPLETED':Completed()}
 
-    def add_task(self,taskPosition:int,task:Tasks):
+        # set parent node for player states
+        for x in self.states:
+            self.states[x].parent_node = self
+            # self.states[x].timer_limit = self.stateTimeLimit[x]
+        
+        # pick state to start in
+        self.state = self.states['IDLE']
+        
+    def activate(self):
+        
+        self.state.emit('ACTIVE')
+        
+        # start task
+        self.start_task()
+        
+        
+    def start_task(self):
+        
+        self.tasks[self.currentTask].activate()
+        
+    def move_to_next_task(self):
+        
+        if self.tasks[self.currentTask].currentState == 'COMPLETED':
+            
+            self.currentTask += 1
+            
+            if self.currentTask >= len(self.tasks):
+                self.state.emit('COMPLETED')
+                return            
+            
+            
+            # start next task
+            self.start_task()
+            
+            
+        
+    def add_task(self,taskPosition:int,task:Task):
 
+        # init task 
+        task.init()
+        
+        # add task to queue
         self.tasks[taskPosition] = task
        
-
     def remove_task(self,taskPosition:int):
         
         del self.tasks[taskPosition]
         
-
-    def update_tasks(self):
+    def update_task(self):
         
         # if we are following an order than we just run the current one
         if self.followOrder:
+            
             self.tasks[self.currentTask].update()
-    
+            
+            # move to next task if complete
+            self.move_to_next_task()
+
+            print(f'current Task = {self.currentTask}')
     # set description
     def set_description(self,value:str):
         
         self.description = value
+        
+    # set parent nodes
+    def add_parent_nodes(self,nodes):
+        
+        if isinstance(nodes,list):
+            self.parentNodes.extend(nodes)
+            
+        else:
+            self.parentNodes.append(nodes)
+            
+    
+            
+    # assign a quest
+    # def assisgn_quest(self):
+        
+    #     for pn in self.parentNodes:
+    #         pass
 
-    @property
-    def get_current_task(self):
-        pass
 
+class QuestManager():
+    
+    def __init__(self):
+        
+        self.inactiveQuests = {}
+        self.activeQuests = {}
+        self.completedQuests = {}
+        
+    def start_quest(self,name):
+        
+        # move quest to active quests
+        self.activeQuests[name] = self.inactiveQuests[name]
+        
+        # init quest
+        self.activeQuests[name].init()
+        
+        # activate quest
+        self.activeQuests[name].activate()
+        
+        # remove from inactive quests
+        del self.inactiveQuests[name]
+
+    def add_quest(self,name:str,quest:Quest):
+        
+        if name not in self.inactiveQuests:
+            
+            # add quest to dict
+            self.inactiveQuests[name] = quest
+            
+    def remove_quest(self,name:str):
+        
+        # add to completed quest
+        self.completedQuests[name] = self.activeQuests[name]
+        
+        # remove from active quests 
+        del self.activeQuests[name]
+    
+    def update(self):
+        
+        if self.activeQuests:
+            for _,quest in self.activeQuests.items():
+                quest.update()
+
+
+questManager = QuestManager()
